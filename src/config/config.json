@@ -18,8 +18,6 @@
   "database": {
     "url": "mongodb://mongo:GpBZqZzBNqTJRzfdKfVPkiUdllZGFUNh@centerbeam.proxy.rlwy.net:59721/communication_db",
     "options": {
-      "useNewUrlParser": true,
-      "useUnifiedTopology": true,
       "serverSelectionTimeoutMS": 5000,
       "socketTimeoutMS": 45000
     }
