@@ -1,6 +1,7 @@
 @echo off
 cd .\ctk
-npm install
+set API_URL=https://tmf-communication-api.up.railway.app
+npm install && npm start
 
 REM Run CTK with correct environment
 npx newman run TMF681-Communication-v4.0.0.testkit.json ^
