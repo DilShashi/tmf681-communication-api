@@ -13,17 +13,19 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "port": 8080
+    "port": "$PORT"
   },
   "database": {
-    "url": "mongodb://mongo:GpBZqZzBNqTJRzfdKfVPkiUdllZGFUNh@centerbeam.proxy.rlwy.net:59721",
+    "url": "mongodb://mongo:GpBZqZzBNqTJRzfdKfVPkiUdllZGFUNh@centerbeam.proxy.rlwy.net:59721/communication_db",
     "options": {
       "useNewUrlParser": true,
-      "useUnifiedTopology": true
+      "useUnifiedTopology": true,
+      "serverSelectionTimeoutMS": 5000,
+      "socketTimeoutMS": 45000
     }
   },
   "logging": {
-    "level": "debug",
+    "level": "info",
     "file": {
       "error": "logs/error.log",
       "combined": "logs/combined.log",

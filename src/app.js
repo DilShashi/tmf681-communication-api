@@ -33,12 +33,18 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://tmf681-communication-api.up.railway.app'] 
+    : '*'
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('combined', { stream: logger.stream }));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', { 
+  stream: logger.stream 
+}));
 
-// Enhanced database connection
+// Enhanced database connection with Railway MongoDB
 const connectWithRetry = async () => {
   mongoose.connection.on('error', err => {
     logger.error(`MongoDB connection error: ${err}`);
@@ -50,25 +56,38 @@ const connectWithRetry = async () => {
 
   mongoose.connection.on('disconnected', () => {
     logger.warn('MongoDB disconnected');
+    if (process.env.NODE_ENV === 'production') {
+      setTimeout(connectWithRetry, 5000);
+    }
   });
 
   try {
     logger.info('Attempting MongoDB connection...');
-    await mongoose.connect(config.database.url, {
+    const mongoOptions = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000
-    });
+    };
+
+    // Add SSL/TLS options for production
+    if (process.env.NODE_ENV === 'production') {
+      mongoOptions.tls = true;
+      mongoOptions.tlsAllowInvalidCertificates = false;
+    }
+
+    await mongoose.connect(config.database.url, mongoOptions);
 
     mongoose.set('debug', process.env.NODE_ENV === 'development');
     mongoose.set('returnOriginal', false);
     mongoose.set('autoIndex', true);
 
     const PORT = process.env.PORT || config.api.port || 8080;
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`API base path: ${config.api.basePath}`);
+      logger.info(`Environment: ${process.env.NODE_ENV}`);
+      logger.info(`MongoDB connected: ${mongoose.connection.readyState === 1}`);
     });
 
     server.on('error', (err) => {
@@ -84,18 +103,31 @@ const connectWithRetry = async () => {
 
 connectWithRetry();
 
-// API routes - Updated listener route path to match specification
+// API routes
 app.use(`${config.api.basePath}/communicationMessage`, communicationRoutes);
 app.use(`${config.api.basePath}/notification`, notificationRoutes);
 app.use(`${config.api.basePath}/hub`, hubRoutes);
-app.use(`${config.api.basePath}/listener`, clientRoutes); // This line remains the same
+app.use(`${config.api.basePath}/listener`, clientRoutes);
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'API is running',
+    version: config.api.version,
+    documentation: `${config.api.baseUrl}${config.api.basePath}/api-docs`,
+    healthCheck: `${config.api.baseUrl}${config.api.basePath}/health`
+  });
+});
 
 // Health check endpoint
 app.get(`${config.api.basePath}/health`, (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'UP' : 'DOWN';
   res.status(200).json({ 
     status: 'UP',
-    database: dbStatus
+    database: dbStatus,
+    environment: process.env.NODE_ENV,
+    baseUrl: config.api.baseUrl,
+    timestamp: new Date().toISOString()
   });
 });
 
