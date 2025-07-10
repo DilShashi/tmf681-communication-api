@@ -1,0 +1,414 @@
+{
+  "info": {
+    "_postman_id": "b6abcc82-5d6f-4834-b5b2-c54fa76729e2",
+    "name": "TMF681-Communication-v4.0.0",
+    "description": "**TMF API Reference : TMF 681 - Communication Management**\n**Release : 19.5 - March 2020**\nThis API provides a standardized mechanism for Communication management such as creation, update, retrieval, deletion and notification of the system communication events.\nThis API manages the following data resources:\n- Communication Message",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "communicationMessage",
+      "item": [
+        {
+          "name": "List or find CommunicationMessage objects",
+          "_postman_id": "3a576468-6c4a-4b98-8ab2-ba22780a6375",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/communicationMessage?fields={{fields}}&offset={{offset}}&limit={{limit}}",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "communicationMessage"
+              ],
+              "query": [
+                {
+                  "key": "fields",
+                  "value": "{{fields}}"
+                },
+                {
+                  "key": "offset",
+                  "value": "{{offset}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}"
+                }
+              ]
+            },
+            "description": "This operation list or find CommunicationMessage entities"
+          },
+          "response": []
+        },
+        {
+          "name": "Creates a CommunicationMessage",
+          "_postman_id": "c3af84b7-98cb-4ba3-ba29-6b7cb8576d31",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"News: the latest promotion for you\",\n  \"scheduledSendTime\": \"2020-02-10T00:00:00+01:00\",\n  \"state\": \"initial\",\n  \"description\": \"this is communication message for promotion\",\n  \"content\": \"Dear $Parameter1, Here is the information of the promotion $Parameter2\",\n  \"messageType\": \"SMS\",\n  \"characteristic\": [\n    {\n      \"name\": \"$Parameter1\",\n      \"value\": \"Mr. Jones\",\n      \"valueType\": \"string\"\n    },\n    {\n      \"name\": \"$Parameter2\",\n      \"value\": \"4G_LTE Discount 30%\",\n      \"valueType\": \"string\"\n    }\n  ],\n  \"attachment\": [\n    {\n      \"url\": \"https://serverlocation/files/1\",\n      \"name\": \"File_XYZ_001\"\n    }\n  ],\n  \"sender\": {\n    \"id\": \"10099\",\n    \"name\": \"ABC Company\",\n    \"phoneNumber\": \"10086\"\n  },\n  \"receiver\": [\n    {\n      \"id\": \"10234\",\n      \"name\": \"Customer\",\n      \"phoneNumber\": \"008613811112222\",\n      \"party\": {\n        \"id\": \"991\",\n        \"href\": \"https://serverlocation/tmf-api/partyManagement/v4/individual/1\",\n        \"role\": \"customer\",\n        \"name\": \"John White\",\n        \"@referredType\": \"Individual\"\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/communicationMessage",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "communicationMessage"
+              ]
+            },
+            "description": "This operation creates a CommunicationMessage entity."
+          },
+          "response": []
+        },
+        {
+          "name": "Retrieves a CommunicationMessage by ID",
+          "_postman_id": "6d7c8905-68c2-4149-9e4c-db1179f4e463",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/communicationMessage/:id?fields={{fields}}",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "communicationMessage",
+                ":id"
+              ],
+              "query": [
+                {
+                  "key": "fields",
+                  "value": "{{fields}}"
+                }
+              ],
+              "variable": [
+                {
+                  "value": "{{id}}",
+                  "id": "id"
+                }
+              ]
+            },
+            "description": "This operation retrieves a CommunicationMessage entity. Attribute selection is enabled for all first level attributes."
+          },
+          "response": []
+        },
+        {
+          "name": "Updates partially a CommunicationMessage",
+          "_postman_id": "d05703eb-36bf-4319-86af-575efce369eb",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledSendTime\": \"2020-02-15T00:00:00+01:00\",\n  \"state\": \"inProgress\"\n}"
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/communicationMessage/:id",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "communicationMessage",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "value": "{{id}}",
+                  "id": "id"
+                }
+              ]
+            },
+            "description": "This operation updates partially a CommunicationMessage entity."
+          },
+          "response": []
+        },
+        {
+          "name": "Deletes a CommunicationMessage",
+          "_postman_id": "03c59032-150c-4dd3-bfd6-a699b0f48fd9",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/communicationMessage/:id",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "communicationMessage",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "value": "{{id}}",
+                  "id": "id"
+                }
+              ]
+            },
+            "description": "This operation deletes a CommunicationMessage entity."
+          },
+          "response": []
+        }
+      ],
+      "_postman_id": "8eda59d4-ae6b-43ea-9f8a-24f61806360a",
+      "description": "Folder for communicationMessage"
+    },
+    {
+      "name": "hub",
+      "item": [
+        {
+          "name": "Register a listener",
+          "_postman_id": "0b3b6421-44ec-4178-9f50-e7b54ee2a5e9",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"callback\": \"callback\",\n    \"query\": \"query\"\n}"
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/hub",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "hub"
+              ]
+            },
+            "description": "Sets the communication endpoint address the service instance must use to deliver information about its health state, execution state, failures and metrics."
+          },
+          "response": []
+        },
+        {
+          "name": "Unregister a listener",
+          "_postman_id": "82aef968-b767-4d4d-bdef-7d1f6fa5ce17",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/hub/:id",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "hub",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "value": "{{id}}",
+                  "id": "id"
+                }
+              ]
+            },
+            "description": "Resets the communication endpoint address the service instance must use to deliver information about its health state, execution state, failures and metrics."
+          },
+          "response": []
+        }
+      ],
+      "_postman_id": "339d9c3c-02e2-420e-8f0c-f42e9dd1fb8d",
+      "description": "Folder for hub"
+    },
+    {
+      "name": "listener",
+      "item": [
+        {
+          "name": "Client listener for entity CommunicationMessageAttributeValueChangeEvent",
+          "_postman_id": "75e06847-25f3-4524-b3b4-ca6c019964b9",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"eventId\": \"eventid\",\n    \"eventTime\": \"2020-11-04t13:31:57.405z\",\n    \"eventType\": \"eventtype\",\n    \"correlationId\": \"correlationid\",\n    \"domain\": \"domain\",\n    \"title\": \"title\",\n    \"description\": \"description\",\n    \"priority\": \"priority\",\n    \"timeOcurred\": \"2020-11-04t13:31:57.405z\",\n    \"fieldPath\": \"fieldpath\",\n    \"event\": {\n        \"communicationMessage\": {\n            \"id\": \"id\",\n            \"href\": \"href\",\n            \"content\": \"content\",\n            \"description\": \"description\",\n            \"logFlag\": true,\n            \"messageType\": \"messagetype\",\n            \"priority\": \"priority\",\n            \"scheduledSendTime\": \"2020-11-04t13:31:57.405z\",\n            \"sendTime\": \"2020-11-04t13:31:57.405z\",\n            \"sendTimeComplete\": \"2020-11-04t13:31:57.405z\",\n            \"subject\": \"subject\",\n            \"tryTimes\": 0,\n            \"attachment\": [\n                {\n                    \"id\": \"4aafacbd-11ff-4dc8-b445-305f2215715f\",\n                    \"href\": \"http://host/Attachment/4aafacbd-11ff-4dc8-b445-305f2215715f\",\n                    \"attachmentType\": \"video\",\n                    \"content\": \"content\",\n                    \"description\": \"Photograph of the Product\",\n                    \"mimeType\": \"mimetype\",\n                    \"name\": \"name\",\n                    \"url\": \"http://host/Content/4aafacbd-11ff-4dc8-b445-305f2215715f\",\n                    \"size\": {\n                        \"amount\": 0,\n                        \"units\": \"units\"\n                    },\n                    \"validFor\": {\n                        \"endDateTime\": \"1985-04-12T23:20:50.52Z\",\n                        \"startDateTime\": \"1985-04-12T23:20:50.52Z\"\n                    }\n                }\n            ],\n            \"characteristic\": [\n                {\n                    \"id\": \"id\",\n                    \"name\": \"name\",\n                    \"valueType\": \"valuetype\",\n                    \"characteristicRelationship\": [\n                        {\n                            \"id\": \"id\",\n                            \"relationshipType\": \"relationshiptype\"\n                        }\n                    ],\n                    \"@baseType\": \"@basetype\",\n                    \"@schemaLocation\": \"@schemalocation\",\n                    \"@type\": \"@type\"\n                }\n            ],\n            \"receiver\": [\n                {\n                    \"id\": \"id\",\n                    \"appUserId\": \"appuserid\",\n                    \"email\": \"email\",\n                    \"ip\": \"ip\",\n                    \"name\": \"name\",\n                    \"phoneNumber\": \"phonenumber\",\n                    \"party\": {\n                        \"id\": \"id\",\n                        \"href\": \"href\",\n                        \"name\": \"name\",\n                        \"role\": \"role\",\n                        \"@baseType\": \"@basetype\",\n                        \"@schemaLocation\": \"@schemalocation\",\n                        \"@type\": \"@type\",\n                        \"@referredType\": \"@referredtype\"\n                    }\n                }\n            ],\n            \"sender\": {\n                \"id\": \"id\",\n                \"email\": \"email\",\n                \"name\": \"name\",\n                \"phoneNumber\": \"phonenumber\",\n                \"party\": {\n                    \"id\": \"id\",\n                    \"href\": \"href\",\n                    \"name\": \"name\",\n                    \"role\": \"role\",\n                    \"@baseType\": \"@basetype\",\n                    \"@schemaLocation\": \"@schemalocation\",\n                    \"@type\": \"@type\",\n                    \"@referredType\": \"@referredtype\"\n                }\n            },\n            \"state\": \"initial\"\n        }\n    }\n}"
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/listener/communicationMessageAttributeValueChangeEvent",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "listener",
+                "communicationMessageAttributeValueChangeEvent"
+              ]
+            },
+            "description": "Example of a client listener for receiving the notification CommunicationMessageAttributeValueChangeEvent"
+          },
+          "response": []
+        },
+        {
+          "name": "Client listener for entity CommunicationMessageStateChangeEvent",
+          "_postman_id": "0d062363-dfdb-469d-b941-aa0f969632c8",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json;charset=utf-8"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"event\": {\n        \"communicationMessage\": {\n            \"id\": \"id\",\n            \"href\": \"href\",\n            \"content\": \"content\",\n            \"description\": \"description\",\n            \"logFlag\": true,\n            \"messageType\": \"messagetype\",\n            \"priority\": \"priority\",\n            \"scheduledSendTime\": \"2020-11-04t13:31:57.405z\",\n            \"sendTime\": \"2020-11-04t13:31:57.405z\",\n            \"sendTimeComplete\": \"2020-11-04t13:31:57.405z\",\n            \"subject\": \"subject\",\n            \"tryTimes\": 0,\n            \"attachment\": [\n                {\n                    \"id\": \"4aafacbd-11ff-4dc8-b445-305f2215715f\",\n                    \"href\": \"http://host/Attachment/4aafacbd-11ff-4dc8-b445-305f2215715f\",\n                    \"attachmentType\": \"video\",\n                    \"content\": \"content\",\n                    \"description\": \"Photograph of the Product\",\n                    \"mimeType\": \"mimetype\",\n                    \"name\": \"name\",\n                    \"url\": \"http://host/Content/4aafacbd-11ff-4dc8-b445-305f2215715f\",\n                    \"size\": {\n                        \"amount\": 0,\n                        \"units\": \"units\"\n                    },\n                    \"validFor\": {\n                        \"endDateTime\": \"1985-04-12T23:20:50.52Z\",\n                        \"startDateTime\": \"1985-04-12T23:20:50.52Z\"\n                    }\n                }\n            ],\n            \"characteristic\": [\n                {\n                    \"id\": \"id\",\n                    \"name\": \"name\",\n                    \"valueType\": \"valuetype\",\n                    \"characteristicRelationship\": [\n                        {\n                            \"id\": \"id\",\n                            \"relationshipType\": \"relationshiptype\"\n                        }\n                    ],\n                    \"@baseType\": \"@basetype\",\n                    \"@schemaLocation\": \"@schemalocation\",\n                    \"@type\": \"@type\"\n                }\n            ],\n            \"receiver\": [\n                {\n                    \"id\": \"id\",\n                    \"appUserId\": \"appuserid\",\n                    \"email\": \"email\",\n                    \"ip\": \"ip\",\n                    \"name\": \"name\",\n                    \"phoneNumber\": \"phonenumber\",\n                    \"party\": {\n                        \"id\": \"id\",\n                        \"href\": \"href\",\n                        \"name\": \"name\",\n                        \"role\": \"role\",\n                        \"@baseType\": \"@basetype\",\n                        \"@schemaLocation\": \"@schemalocation\",\n                        \"@type\": \"@type\",\n                        \"@referredType\": \"@referredtype\"\n                    }\n                }\n            ],\n            \"sender\": {\n                \"id\": \"id\",\n                \"email\": \"email\",\n                \"name\": \"name\",\n                \"phoneNumber\": \"phonenumber\",\n                \"party\": {\n                    \"id\": \"id\",\n                    \"href\": \"href\",\n                    \"name\": \"name\",\n                    \"role\": \"role\",\n                    \"@baseType\": \"@basetype\",\n                    \"@schemaLocation\": \"@schemalocation\",\n                    \"@type\": \"@type\",\n                    \"@referredType\": \"@referredtype\"\n                }\n            },\n            \"state\": \"initial\"\n        }\n    },\n    \"eventId\": \"eventid\",\n    \"eventTime\": \"2020-11-04t13:31:57.405z\",\n    \"eventType\": \"eventtype\",\n    \"correlationId\": \"correlationid\",\n    \"domain\": \"domain\",\n    \"title\": \"title\",\n    \"description\": \"description\",\n    \"priority\": \"priority\",\n    \"timeOcurred\": \"2020-11-04t13:31:57.405z\"\n}"
+            },
+            "url": {
+              "raw": "{{scheme}}://{{host}}:{{port}}/tmf-api/communicationManagement/v4/listener/communicationMessageStateChangeEvent",
+              "protocol": "{{scheme}}",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "tmf-api",
+                "communicationManagement",
+                "v4",
+                "listener",
+                "communicationMessageStateChangeEvent"
+              ]
+            },
+            "description": "Example of a client listener for receiving the notification CommunicationMessageStateChangeEvent"
+          },
+          "response": []
+        }
+      ],
+      "_postman_id": "883210b5-a586-41bc-b672-4346078df834",
+      "description": "Folder for listener"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "url": "http://localhost:8080/tmf-api/communicationManagement/v4/",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "payloads": {
+    "@type": "CommunicationMessage",
+    "subject": "News: the latest promotion for you",
+    "scheduledSendTime": "2020-02-09T23:00:00.000Z",
+    "state": "initial",
+    "description": "this is communication message for promotion",
+    "content": "Dear $Parameter1, Here is the information of the promotion $Parameter2",
+    "messageType": "SMS",
+    "characteristic": [
+      {
+        "name": "$Parameter1",
+        "value": "Mr. Jones",
+        "valueType": "string"
+      },
+      {
+        "name": "$Parameter2",
+        "value": "4G_LTE Discount 30%",
+        "valueType": "string"
+      }
+    ],
+    "attachment": [
+      {
+        "url": "https://serverlocation/files/1",
+        "name": "File_XYZ_001",
+        "content": "...",
+        "attachmentType": "...",
+        "mimeType": "application/pdf"
+      }
+    ],
+    "sender": {
+      "id": "10099",
+      "name": "ABC Company",
+      "phoneNumber": "10086",
+      "party": {
+        "role": "service provider",
+        "partyOrPartyRole": {
+          "id": "1066",
+          "href": "https://serverlocation/tmf-api/partyManagement/v4/organization/1",
+          "name": "ABC Company",
+          "@type": "Organization"
+        },
+        "@type": "RelatedPartyOrPartyRole"
+      }
+    },
+    "receiver": [
+      {
+        "id": "10234",
+        "name": "John White",
+        "phoneNumber": "008613811112222",
+        "party": {
+          "role": "customer",
+          "partyOrPartyRole": {
+            "id": "991",
+            "href": "https://serverlocation/tmf-api/partyManagement/v4/individual/1",
+            "name": "John White",
+            "@type": "Individual"
+          },
+          "@type": "RelatedPartyOrPartyRole"
+        }
+      }
+    ]
+  }
+}

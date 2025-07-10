@@ -1,0 +1,30 @@
+# Ignore node_modules
+node_modules
+
+# Ignore logs
+logs
+
+# Ignore test files
+tests
+
+# Ignore development files
+.git
+.gitignore
+.editorconfig
+.npmrc
+
+# Ignore environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Ignore IDE files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

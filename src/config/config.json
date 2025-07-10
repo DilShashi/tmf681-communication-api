@@ -1,0 +1,45 @@
+{
+  "api": {
+    "baseUrl": "http://localhost:8080",
+    "basePath": "/tmf-api/communicationManagement/v4",
+    "version": "4.0.0",
+    "title": "Communication Management API",
+    "description": "TM Forum Communication Management API v4.0.0 implementation",
+    "contact": {
+      "name": "API Support",
+      "email": "support@tmforum.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "port": 8080
+  },
+  "database": {
+    "url": "mongodb://localhost:27017/communication_db",
+    "options": {
+      "useNewUrlParser": true,
+      "useUnifiedTopology": true
+    }
+  },
+  "logging": {
+    "level": "debug",
+    "file": {
+      "error": "logs/error.log",
+      "combined": "logs/combined.log",
+      "exceptions": "logs/exceptions.log"
+    }
+  },
+  "schema": {
+    "baseUrl": "http://www.tmforum.org/json-schemas"
+  },
+  "retry": {
+    "maxRetries": 3,
+    "initialDelay": 1000,
+    "delayMultiplier": 2
+  },
+  "security": {
+    "jwtSecret": "tmf681_communication_secret",
+    "tokenExpiration": "1h"
+  }
+}

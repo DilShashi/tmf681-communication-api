@@ -1,0 +1,109 @@
+[
+  {
+    "description": "Basic SMS message",
+    "message": {
+      "content": "Dear Customer, your order has been processed.",
+      "messageType": "SMS",
+      "receiver": [
+        {
+          "phoneNumber": "+1234567890",
+          "name": "John Doe"
+        }
+      ],
+      "sender": {
+        "phoneNumber": "+9876543210",
+        "name": "ABC Company"
+      }
+    }
+  },
+  {
+    "description": "Email message with subject",
+    "message": {
+      "content": "Dear Customer, your order has been processed.",
+      "messageType": "Email",
+      "subject": "Order Confirmation",
+      "receiver": [
+        {
+          "email": "customer@example.com",
+          "name": "John Doe"
+        }
+      ],
+      "sender": {
+        "email": "noreply@company.com",
+        "name": "ABC Company"
+      }
+    }
+  },
+  {
+    "description": "Message with scheduled send time",
+    "message": {
+      "content": "Dear Customer, your order has been processed.",
+      "messageType": "SMS",
+      "scheduledSendTime": "2023-12-31T23:59:00Z",
+      "receiver": [
+        {
+          "phoneNumber": "+1234567890",
+          "name": "John Doe"
+        }
+      ],
+      "sender": {
+        "phoneNumber": "+9876543210",
+        "name": "ABC Company"
+      }
+    }
+  },
+  {
+    "description": "Message with characteristics",
+    "message": {
+      "content": "Dear $customerName, your order $orderId has been processed.",
+      "messageType": "SMS",
+      "characteristic": [
+        {
+          "name": "$customerName",
+          "value": "John Doe",
+          "valueType": "string"
+        },
+        {
+          "name": "$orderId",
+          "value": "ORD12345",
+          "valueType": "string"
+        }
+      ],
+      "receiver": [
+        {
+          "phoneNumber": "+1234567890",
+          "name": "John Doe"
+        }
+      ],
+      "sender": {
+        "phoneNumber": "+9876543210",
+        "name": "ABC Company"
+      }
+    }
+  },
+  {
+    "description": "Message with attachments",
+    "message": {
+      "content": "Please find attached your order confirmation.",
+      "messageType": "Email",
+      "subject": "Order Confirmation",
+      "attachment": [
+        {
+          "url": "https://example.com/attachments/order123.pdf",
+          "name": "OrderConfirmation.pdf",
+          "mimeType": "application/pdf"
+        }
+      ],
+      "receiver": [
+        {
+          "email": "customer@example.com",
+          "name": "John Doe"
+        }
+      ],
+      "sender": {
+        "email": "noreply@company.com",
+        "name": "ABC Company"
+      }
+    }
+  }
+]

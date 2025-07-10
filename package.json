@@ -1,0 +1,49 @@
+{
+  "name": "communication-service",
+  "version": "1.0.0",
+  "description": "TM Forum Communication Management API v4.0.0 implementation",
+  "main": "src/app.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "mocha tests/integration/**/*.test.js --exit",
+    "test:watch": "mocha tests/integration/**/*.test.js --watch --exit",
+    "lint": "eslint .",
+    "docker:build": "docker build -t communication-service .",
+    "docker:run": "docker run -p 8080:8080 communication-service",
+    "ctk": "cd ctk && npm install && npm start"
+  },
+  "keywords": [
+    "tmforum",
+    "communication",
+    "api"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "helmet": "^7.2.0",
+    "joi": "^17.13.3",
+    "mongoose": "^8.16.2",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.8",
+    "chai-http": "^4.4.0",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "mocha": "^10.2.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.10",
+    "sinon": "^17.0.1"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  }
+}

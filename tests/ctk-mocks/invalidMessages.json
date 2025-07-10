@@ -1,0 +1,93 @@
+[
+  {
+    "description": "Missing required content field",
+    "message": {
+      "messageType": "SMS",
+      "receiver": [
+        {
+          "phoneNumber": "+1234567890",
+          "name": "John Doe"
+        }
+      ],
+      "sender": {
+        "phoneNumber": "+9876543210",
+        "name": "ABC Company"
+      }
+    },
+    "expectedError": "content is required"
+  },
+  {
+    "description": "Missing required messageType field",
+    "message": {
+      "content": "Test message",
+      "receiver": [
+        {
+          "phoneNumber": "+1234567890",
+          "name": "John Doe"
+        }
+      ],
+      "sender": {
+        "phoneNumber": "+9876543210",
+        "name": "ABC Company"
+      }
+    },
+    "expectedError": "messageType is required"
+  },
+  {
+    "description": "Invalid messageType value",
+    "message": {
+      "content": "Test message",
+      "messageType": "InvalidType",
+      "receiver": [
+        {
+          "phoneNumber": "+1234567890",
+          "name": "John Doe"
+        }
+      ],
+      "sender": {
+        "phoneNumber": "+9876543210",
+        "name": "ABC Company"
+      }
+    },
+    "expectedError": "messageType must be one of"
+  },
+  {
+    "description": "Missing required receiver field",
+    "message": {
+      "content": "Test message",
+      "messageType": "SMS",
+      "sender": {
+        "phoneNumber": "+9876543210",
+        "name": "ABC Company"
+      }
+    },
+    "expectedError": "receiver is required"
+  },
+  {
+    "description": "Empty receiver array",
+    "message": {
+      "content": "Test message",
+      "messageType": "SMS",
+      "receiver": [],
+      "sender": {
+        "phoneNumber": "+9876543210",
+        "name": "ABC Company"
+      }
+    },
+    "expectedError": "receiver must contain at least 1 items"
+  },
+  {
+    "description": "Missing required sender field",
+    "message": {
+      "content": "Test message",
+      "messageType": "SMS",
+      "receiver": [
+        {
+          "phoneNumber": "+1234567890",
+          "name": "John Doe"
+        }
+      ]
+    },
+    "expectedError": "sender is required"
+  }
+]
