@@ -1,8 +1,17 @@
 {
   "build": {
-    "builder": "NIXPACKS"
+    "builder": "NIXPACKS",
+    "buildCommand": "npm install --omit=dev",
+    "installCommand": "npm install"
   },
   "start": {
-    "cmd": "node railway-start.js"
+    "cmd": "node railway-start.js",
+    "nixpacks": {
+      "start": "node railway-start.js"
+    }
+  },
+  "variables": {
+    "NODE_ENV": "production",
+    "PORT": "8080"
   }
 }

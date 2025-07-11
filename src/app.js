@@ -9,7 +9,7 @@ const config = require('./config/tmf-config');
 const logger = require('./utils/logger');
 const TMFErrorHandler = require('./utils/tmfErrorHandler');
 
-// Enhanced model pre-loading (unchanged)
+// Load all MongoDB models to ensure they're registered with Mongoose
 const loadModels = () => {
   require('./models/CommunicationMessage');
   require('./models/Attachment');
@@ -23,22 +23,39 @@ const loadModels = () => {
 };
 loadModels();
 
-// Import routes (unchanged)
+// Import route handlers
 const communicationRoutes = require('./routes/communicationRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const hubRoutes = require('./routes/hubRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 
+// Initialize Express application
 const app = express();
 
-// Middleware (unchanged)
+// Security middleware
 app.use(helmet());
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('combined', { stream: logger.stream }));
 
-// Enhanced MongoDB connection with proper authentication handling
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://tmf681-communication-api.up.railway.app'] 
+    : '*',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Accept']
+}));
+
+// Request parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// HTTP request logging
+app.use(morgan('combined', { 
+  stream: {
+    write: (message) => logger.info(message.trim())
+  }
+}));
+
+// MongoDB connection with retry logic
 const connectWithRetry = async () => {
   const MAX_RETRIES = 5;
   const RETRY_DELAY = 5000;
@@ -50,21 +67,17 @@ const connectWithRetry = async () => {
     maxPoolSize: parseInt(process.env.DB_POOL_SIZE) || 10,
     retryWrites: true,
     retryReads: true,
-    auth: {
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD
-    },
-    authSource: 'admin' // Important for Railway MongoDB
+    authSource: 'admin'
   });
 
   const connect = async () => {
     try {
       const mongoUrl = process.env.DB_URL || config.database.url;
-      logger.info(`Attempting to connect to MongoDB at ${mongoUrl.replace(/:[^:]*@/, ':***@')}`);
+      logger.info(`Attempting MongoDB connection to ${mongoUrl.replace(/:[^:]*@/, ':***@')}`);
       
       await mongoose.connect(mongoUrl, getMongoOptions());
       
-      logger.info('Connected to MongoDB successfully');
+      logger.info('MongoDB connection established successfully');
       return true;
     } catch (err) {
       logger.error(`MongoDB connection error: ${err.message}`);
@@ -88,49 +101,59 @@ const connectWithRetry = async () => {
   }
 };
 
-// Event listeners (unchanged)
+// MongoDB event listeners
 mongoose.connection.on('error', err => {
   logger.error(`MongoDB connection error: ${err}`);
 });
 
 mongoose.connection.on('connected', () => {
-  logger.info('MongoDB connection established');
+  logger.info('MongoDB connection active');
 });
 
 mongoose.connection.on('disconnected', () => {
-  logger.warn('MongoDB disconnected. Attempting to reconnect...');
+  logger.warn('MongoDB connection lost. Attempting to reconnect...');
   setTimeout(connectWithRetry, 5000);
 });
 
-// Initialize connection
+// Initialize database connection
 connectWithRetry();
 
-// API routes (unchanged)
+// API routes
 app.use(`${config.api.basePath}/communicationMessage`, communicationRoutes);
 app.use(`${config.api.basePath}/notification`, notificationRoutes);
 app.use(`${config.api.basePath}/hub`, hubRoutes);
 app.use(`${config.api.basePath}/listener`, clientRoutes);
 
-// Health check (unchanged)
+// Health check endpoint
 app.get(`${config.api.basePath}/health`, (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'UP' : 'DOWN';
   res.status(200).json({ 
     status: 'UP',
     database: dbStatus,
     version: config.api.version,
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    baseUrl: config.api.baseUrl,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
   });
 });
 
-// Error handling (unchanged)
+// API documentation redirect
+app.get(`${config.api.basePath}/api-docs`, (req, res) => {
+  res.redirect('https://www.tmforum.org/resources/specification/tmf681-communication-management-api-v4-0-0/');
+});
+
+// 404 Not Found handler
 app.use((req, res, next) => {
   TMFErrorHandler.handleNotFound(req, res, next);
 });
 
+// Global error handler
 app.use((err, req, res, next) => {
   TMFErrorHandler.handleError(err, req, res, next);
 });
 
+// Process event handlers
 process.on('unhandledRejection', (err) => {
   logger.error('Unhandled Rejection:', err);
 });
@@ -140,10 +163,30 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
+process.on('SIGTERM', () => {
+  logger.info('Received SIGTERM. Gracefully shutting down...');
+  server.close(() => {
+    mongoose.connection.close(false, () => {
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('Received SIGINT. Gracefully shutting down...');
+  server.close(() => {
+    mongoose.connection.close(false, () => {
+      process.exit(0);
+    });
+  });
+});
+
+// Start server
 const PORT = process.env.PORT || config.api.port || 8080;
 const server = app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
   logger.info(`API base path: ${config.api.basePath}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 server.on('error', (err) => {

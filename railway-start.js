@@ -1,12 +1,24 @@
-// railway-start.js
+const logger = require('./src/utils/logger');
+
 process.on('SIGTERM', () => {
-  console.log('Received SIGTERM. Gracefully shutting down...');
+  logger.info('Received SIGTERM. Gracefully shutting down...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('Received SIGINT. Gracefully shutting down...');
+  logger.info('Received SIGINT. Gracefully shutting down...');
   process.exit(0);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+// Handle unhandled rejections
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 require('./src/app');

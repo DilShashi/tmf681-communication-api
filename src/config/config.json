@@ -1,6 +1,6 @@
 {
   "api": {
-    "baseUrl": "http://localhost:8080",
+    "baseUrl": "https://tmf681-communication-api.up.railway.app",
     "basePath": "/tmf-api/communicationManagement/v4",
     "version": "4.0.0",
     "title": "Communication Management API",
