@@ -13,8 +13,8 @@ COPY . .
 
 # Set environment variables
 ENV NODE_ENV production
+ENV PORT=8080
 EXPOSE 8080
-
 
 
 # Create logs directory
