@@ -3,38 +3,41 @@ require('dotenv').config();
 const { startServer } = require('./src/app');
 const logger = require('./src/utils/logger');
 
-// Start the server with Railway-specific configuration
+// Railway-specific startup
 const startApplication = async () => {
   try {
-    // Railway-specific configuration
-    process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-    process.env.PORT = process.env.PORT || '8080';
+    // Ensure required Railway variables are set
+    if (!process.env.PORT) {
+      process.env.PORT = '8080';
+    }
+    if (!process.env.NODE_ENV) {
+      process.env.NODE_ENV = 'production';
+    }
+
+    logger.info('Starting Railway application...');
+    logger.info(`Railway Environment: ${process.env.RAILWAY_ENVIRONMENT_NAME || 'Not detected'}`);
     
-    logger.info('Starting application with Railway configuration...');
     const server = await startServer();
     
-    // Railway-specific event listeners
-    process.on('SIGTERM', () => {
-      logger.info('Received SIGTERM. Preparing for shutdown...');
-      server.close(() => {
-        logger.info('Server closed');
-        process.exit(0);
-      });
+    // Additional Railway health checks
+    server.on('listening', () => {
+      logger.info('Application ready for requests');
     });
     
     return server;
   } catch (err) {
-    logger.error('Failed to start application:', err);
+    logger.error('Failed to start Railway application:', err);
     process.exit(1);
   }
 };
 
+// Start with error handling
 startApplication().catch(err => {
-  logger.error('Application failed:', err);
+  logger.error('Application startup failed:', err);
   process.exit(1);
 });
 
-// Global error handlers
+// Global error handlers remain the same
 process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err);
   process.exit(1);

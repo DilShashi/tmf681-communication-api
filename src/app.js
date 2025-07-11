@@ -23,6 +23,8 @@ const loadModels = () => {
 };
 loadModels();
 
+const isRailway = process.env.RAILWAY_ENVIRONMENT_ID !== undefined;
+
 // Import route handlers
 const communicationRoutes = require('./routes/communicationRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
@@ -155,39 +157,47 @@ const startServer = async () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`API base path: ${config.api.basePath}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
-
-    // Handle server errors
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        logger.error(`Port ${PORT} is already in use. Trying alternative port...`);
-        const altPort = PORT + 1;
-        const altServer = app.listen(altPort, '0.0.0.0', () => {
-          logger.info(`🚀 Server running on alternative port ${altPort}`);
-        });
-        return altServer;
+      if (isRailway) {
+        logger.info('Running in Railway environment');
       }
-      logger.error('Server error:', err);
-      process.exit(1);
     });
 
-    // Graceful shutdown
-    const shutdown = async () => {
-      logger.info('Received shutdown signal. Gracefully shutting down...');
-      server.close(async () => {
-        try {
-          await mongoose.connection.close();
-          logger.info('MongoDB connection closed.');
-          process.exit(0);
-        } catch (err) {
-          logger.error('Error closing MongoDB connection:', err);
-          process.exit(1);
-        }
-      });
+    // Railway-specific graceful shutdown
+    const shutdown = async (signal) => {
+      logger.info(`Received ${signal}. Gracefully shutting down...`);
+      
+      try {
+        // Close server first
+        await new Promise((resolve) => {
+          server.close((err) => {
+            if (err) {
+              logger.error('Error closing server:', err);
+            } else {
+              logger.info('Server closed');
+            }
+            resolve();
+          });
+        });
+        
+        // Then close MongoDB
+        await mongoose.connection.close();
+        logger.info('MongoDB connection closed.');
+        
+        process.exit(0);
+      } catch (err) {
+        logger.error('Error during shutdown:', err);
+        process.exit(1);
+      }
     };
 
-    process.on('SIGTERM', shutdown);
-    process.on('SIGINT', shutdown);
+    // Handle different signals
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    
+    // Railway-specific: Handle container stop
+    if (isRailway) {
+      process.on('SIGUSR2', () => shutdown('SIGUSR2'));
+    }
 
     return server;
   } catch (err) {
