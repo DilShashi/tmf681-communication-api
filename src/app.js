@@ -162,27 +162,37 @@ const startServer = async () => {
       }
     });
 
-    // Railway-specific graceful shutdown
+    // Enhanced shutdown handler
     const shutdown = async (signal) => {
-      logger.info(`Received ${signal}. Gracefully shutting down...`);
+      logger.info(`Received ${signal}. Starting graceful shutdown...`);
+      
+      // Set timeout for forced shutdown if graceful shutdown takes too long
+      const shutdownTimer = setTimeout(() => {
+        logger.error('Shutdown taking too long, forcing exit');
+        process.exit(1);
+      }, 30000); // 30 seconds timeout
       
       try {
-        // Close server first
+        // Close server
         await new Promise((resolve) => {
           server.close((err) => {
+            clearTimeout(shutdownTimer);
             if (err) {
               logger.error('Error closing server:', err);
             } else {
-              logger.info('Server closed');
+              logger.info('Server closed successfully');
             }
             resolve();
           });
         });
         
-        // Then close MongoDB
-        await mongoose.connection.close();
-        logger.info('MongoDB connection closed.');
+        // Close MongoDB connection
+        if (mongoose.connection.readyState === 1) {
+          await mongoose.connection.close(false); // force close
+          logger.info('MongoDB connection closed');
+        }
         
+        logger.info('Graceful shutdown complete');
         process.exit(0);
       } catch (err) {
         logger.error('Error during shutdown:', err);
@@ -190,13 +200,21 @@ const startServer = async () => {
       }
     };
 
-    // Handle different signals
+    // Signal handlers
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
     
-    // Railway-specific: Handle container stop
+    // Railway-specific handlers
     if (isRailway) {
       process.on('SIGUSR2', () => shutdown('SIGUSR2'));
+      
+      // Add heartbeat endpoint for Railway health checks
+      app.get('/railway-health', (req, res) => {
+        res.status(200).json({
+          status: 'OK',
+          timestamp: new Date().toISOString()
+        });
+      });
     }
 
     return server;
