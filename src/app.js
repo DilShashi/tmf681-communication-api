@@ -149,33 +149,26 @@ const startServer = async () => {
   try {
     await connectWithRetry();
     
-    const getAvailablePort = async (basePort) => {
-      const net = require('net');
-      const portCheck = (port) => new Promise((resolve) => {
-        const server = net.createServer();
-        server.once('error', () => resolve(false));
-        server.once('listening', () => {
-          server.close();
-          resolve(port);
-        });
-        server.listen(port);
-      });
-
-      let port = parseInt(basePort, 10);
-      while (port < 65536) {
-        const available = await portCheck(port);
-        if (available) return port;
-        port++;
-      }
-      throw new Error('No available ports found');
-    };
-
-    const PORT = await getAvailablePort(process.env.PORT || process.env.API_PORT || 8080);
+    const PORT = parseInt(process.env.PORT || process.env.API_PORT || 8080, 10);
     
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`API base path: ${config.api.basePath}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+
+    // Handle server errors
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        logger.error(`Port ${PORT} is already in use. Trying alternative port...`);
+        const altPort = PORT + 1;
+        const altServer = app.listen(altPort, '0.0.0.0', () => {
+          logger.info(`🚀 Server running on alternative port ${altPort}`);
+        });
+        return altServer;
+      }
+      logger.error('Server error:', err);
+      process.exit(1);
     });
 
     // Graceful shutdown
