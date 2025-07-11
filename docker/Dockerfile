@@ -13,8 +13,9 @@ COPY . .
 
 # Set environment variables
 ENV NODE_ENV production
-ENV PORT 8080
-EXPOSE 8080
+ENV PORT=${PORT}
+EXPOSE ${PORT}
+
 
 # Create logs directory
 RUN mkdir -p logs
