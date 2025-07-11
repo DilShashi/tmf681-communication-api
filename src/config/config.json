@@ -18,8 +18,14 @@
   "database": {
     "url": "mongodb://localhost:27017/communication_db",
     "options": {
-      "useNewUrlParser": true,
-      "useUnifiedTopology": true
+      "serverSelectionTimeoutMS": 5000,
+      "socketTimeoutMS": 45000,
+      "maxPoolSize": 10,
+      "auth": {
+        "username": "",
+        "password": "",
+        "authSource": "admin"
+      }
     }
   },
   "logging": {
