@@ -6,6 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/app.js",
+    "build": "npm install --omit=dev",
+    "watch": "nodemon src/app.js",
     "dev": "nodemon src/app.js",
     "test": "mocha tests/integration/**/*.test.js --exit",
     "test:watch": "mocha tests/integration/**/*.test.js --watch --exit",

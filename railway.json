@@ -1,18 +1,8 @@
 {
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@railway/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "PORT": "8080"
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "start": {
+    "cmd": "node railway-start.js"
   }
 }
