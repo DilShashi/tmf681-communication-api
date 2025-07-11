@@ -136,16 +136,14 @@ app.get(`${config.api.basePath}/api-docs`, (req, res) => {
   res.redirect('https://www.tmforum.org/resources/specification/tmf681-communication-management-api-v4-0-0/');
 });
 
-// Railway-specific health check
-if (isRailway) {
-  app.get('/railway-health', (req, res) => {
-    res.status(200).json({
-      status: 'OK',
-      timestamp: new Date().toISOString(),
-      service: process.env.RAILWAY_SERVICE_NAME
-    });
+// Railway-specific endpoint
+app.get('/railway', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    service: process.env.RAILWAY_SERVICE_NAME,
+    environment: process.env.RAILWAY_ENVIRONMENT_NAME
   });
-}
+});
 
 // 404 Not Found handler
 app.use((req, res, next) => {
@@ -173,53 +171,25 @@ const startServer = async () => {
       }
     });
 
-    // Enhanced shutdown handler with Railway-specific logic
-    const shutdown = async (signal) => {
-      logger.info(`Received ${signal}. Starting graceful shutdown...`);
+    // Railway-optimized shutdown handler
+    const shutdown = (signal) => {
+      logger.info(`Received ${signal}, initiating immediate shutdown...`);
       
-      // Set timeout for forced shutdown
-      const forceShutdownTimer = setTimeout(() => {
-        logger.error('Graceful shutdown timeout, forcing exit');
-        process.exit(1);
-      }, 10000); // 10 seconds timeout for Railway
-
-      try {
-        // Close server
-        await new Promise((resolve) => {
-          server.close((err) => {
-            clearTimeout(forceShutdownTimer);
-            if (err) {
-              logger.error('Error closing server:', err);
-            } else {
-              logger.info('Server closed successfully');
-            }
-            resolve();
-          });
-        });
-
-        // Close MongoDB connection with Railway-specific handling
-        if (mongoose.connection.readyState === 1) {
-          await mongoose.connection.close(false); // force close
-          logger.info('MongoDB connection closed');
-        }
-
-        logger.info('Graceful shutdown complete');
-        process.exit(0);
-      } catch (err) {
-        logger.error('Error during shutdown:', err);
-        process.exit(1);
-      }
+      // Immediate server close
+      server.close(() => {
+        logger.info('Server closed');
+      });
+      
+      // Force MongoDB disconnect
+      mongoose.connection.close(false)
+        .then(() => logger.info('MongoDB connection closed'))
+        .catch(err => logger.error('Error closing MongoDB:', err))
+        .finally(() => process.exit(0));
     };
 
-    // Signal handlers with Railway priority
-    if (isRailway) {
-      process.on('SIGTERM', () => shutdown('SIGTERM (Railway)'));
-      process.removeAllListeners('SIGINT'); // Remove default handler
-      process.on('SIGINT', () => shutdown('SIGINT (Railway)'));
-    } else {
-      process.on('SIGTERM', () => shutdown('SIGTERM'));
-      process.on('SIGINT', () => shutdown('SIGINT'));
-    }
+    // Simplified signal handling for Railway
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
 
     return server;
   } catch (err) {
@@ -228,7 +198,6 @@ const startServer = async () => {
   }
 };
 
-// Export both app and startServer for different environments
 module.exports = {
   app,
   startServer
