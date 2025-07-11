@@ -1,0 +1,112 @@
+<!-- src/views/api-home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{API_TITLE}} - v{{API_VERSION}}</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #1e40af;
+      --light: #f8fafc;
+      --dark: #1e293b;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 2rem 0;
+      text-align: center;
+      border-bottom: 5px solid var(--secondary);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    .version {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    .endpoints {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .endpoint {
+      background: var(--light);
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      border-radius: 4px;
+    }
+    .endpoint h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+    .footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>{{API_TITLE}}</h1>
+      <div class="version">Version {{API_VERSION}}</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2>API Endpoints</h2>
+      <div class="endpoints">
+        <div class="endpoint">
+          <h3>Communication Messages</h3>
+          <p><strong>GET</strong> <a href="{{API_BASE_PATH}}/communicationMessage">{{API_BASE_PATH}}/communicationMessage</a></p>
+          <p>List all communication messages</p>
+        </div>
+        <div class="endpoint">
+          <h3>Health Check</h3>
+          <p><strong>GET</strong> <a href="{{API_BASE_PATH}}/health">{{API_BASE_PATH}}/health</a></p>
+          <p>Check API health status</p>
+        </div>
+        <div class="endpoint">
+          <h3>API Documentation</h3>
+          <p><strong>GET</strong> <a href="{{API_BASE_PATH}}/api-docs">{{API_BASE_PATH}}/api-docs</a></p>
+          <p>TM Forum API documentation</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Generated at {{TIMESTAMP}}</p>
+    </div>
+  </footer>
+</body>
+</html>

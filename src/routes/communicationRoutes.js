@@ -1,6 +1,11 @@
+// src/routes/communicationRoutes.js
 const express = require('express');
 const router = express.Router();
 const CommunicationController = require('../controllers/CommunicationController');
+const ViewController = require('../controllers/ViewController'); // Add this line
+
+// Add this new route at the top
+router.get('/', ViewController.getApiHome);
 
 // List communication messages with pagination support
 router.get('/', (req, res, next) => {
