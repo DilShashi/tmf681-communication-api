@@ -19,12 +19,6 @@ require('./models/Event');
 require('./models/Quantity');
 require('./models/RelatedParty');
 
-// Import routes
-const communicationRoutes = require('./routes/communicationRoutes');
-const notificationRoutes = require('./routes/notificationRoutes');
-const hubRoutes = require('./routes/hubRoutes');
-const clientRoutes = require('./routes/clientRoutes');
-
 const app = express();
 
 // Middleware
@@ -43,17 +37,18 @@ app.use(morgan('combined', { stream: logger.stream }));
 // Database connection with retry
 const connectWithRetry = async () => {
   const mongoOptions = {
+    // ❌ Do NOT use TLS (this was the problem)
     serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-    tls: true,
-    tlsAllowInvalidCertificates: false
+    socketTimeoutMS: 45000
   };
 
   try {
-    await mongoose.connect(process.env.MONGO_URL || config.database.url, mongoOptions);
+    const mongoUrl = process.env.MONGO_URL || config.database.url;
+    logger.info(`Attempting MongoDB connection to ${mongoUrl}`);
+    await mongoose.connect(mongoUrl, mongoOptions);
     logger.info('Connected to MongoDB successfully');
 
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 8080;
     app.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server running on port ${PORT}`);
     });
@@ -66,10 +61,10 @@ const connectWithRetry = async () => {
 connectWithRetry();
 
 // Routes
-app.use(`${config.api.basePath}/communicationMessage`, communicationRoutes);
-app.use(`${config.api.basePath}/notification`, notificationRoutes);
-app.use(`${config.api.basePath}/hub`, hubRoutes);
-app.use(`${config.api.basePath}/listener`, clientRoutes);
+app.use(`${config.api.basePath}/communicationMessage`, require('./routes/communicationRoutes'));
+app.use(`${config.api.basePath}/notification`, require('./routes/notificationRoutes'));
+app.use(`${config.api.basePath}/hub`, require('./routes/hubRoutes'));
+app.use(`${config.api.basePath}/listener`, require('./routes/clientRoutes'));
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -101,7 +96,6 @@ app.use(TMFErrorHandler.handleError);
 process.on('unhandledRejection', (err) => {
   logger.error('Unhandled Rejection:', err);
 });
-
 process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err);
   process.exit(1);
