@@ -111,6 +111,11 @@ mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB connection lost');
 });
 
+// Add this before the API routes
+app.get(`${config.api.basePath}/`, (req, res) => {
+  res.redirect(`${config.api.basePath}/communicationMessage`);
+});
+
 // API routes
 app.use(`${config.api.basePath}/communicationMessage`, communicationRoutes);
 app.use(`${config.api.basePath}/notification`, notificationRoutes);

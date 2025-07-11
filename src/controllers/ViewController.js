@@ -7,27 +7,24 @@ const CommunicationMessage = require('../models/CommunicationMessage');
 class ViewController {
   static async getApiHome(req, res) {
     try {
+      // Handle both root path and /communicationMessage
+      const isRootPath = req.path === '/';
       const htmlPath = path.join(__dirname, '../views/api-home.html');
       let html = fs.readFileSync(htmlPath, 'utf8');
       
-      // Get sample messages for the UI
       const sampleMessages = await CommunicationMessage.find()
         .limit(3)
         .sort({ createdAt: -1 })
         .lean();
       
+      const basePath = isRootPath ? '' : config.api.basePath;
+      
       html = html
-        .replace(/{{API_BASE_PATH}}/g, config.api.basePath)
+        .replace(/{{API_BASE_PATH}}/g, basePath)
         .replace(/{{API_VERSION}}/g, config.api.version)
         .replace(/{{API_TITLE}}/g, config.api.title)
         .replace(/{{TIMESTAMP}}/g, new Date().toISOString())
         .replace('"{{SAMPLE_MESSAGES}}"', JSON.stringify(sampleMessages));
-      
-      // Add messages as data attribute to script tag
-      html = html.replace(
-        '<script>',
-        `<script data-messages='${JSON.stringify(sampleMessages)}'>`
-      );
       
       res.status(200).set('Content-Type', 'text/html').send(html);
     } catch (err) {
