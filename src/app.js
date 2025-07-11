@@ -179,16 +179,16 @@ process.on('SIGINT', () => {
 });
 
 // Start server
-const PORT = process.env.PORT || config.api.port || 8080;
-const server = app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`API base path: ${config.api.basePath}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// const PORT = process.env.PORT || config.api.port || 8080;
+// const server = app.listen(PORT, () => {
+//   logger.info(`Server running on port ${PORT}`);
+//   logger.info(`API base path: ${config.api.basePath}`);
+//   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+// });
 
-server.on('error', (err) => {
-  logger.error('Server error:', err);
-  process.exit(1);
-});
+// server.on('error', (err) => {
+//   logger.error('Server error:', err);
+//   process.exit(1);
+// });
 
 module.exports = app;

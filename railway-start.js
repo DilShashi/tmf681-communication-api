@@ -1,20 +1,35 @@
+// railway-start.js
+require('dotenv').config();
 const logger = require('./src/utils/logger');
+const app = require('./src/app'); // Now this just returns the app
 
-// Enhanced shutdown handlers
-const gracefulShutdown = async () => {
-  logger.info('Starting graceful shutdown...');
-  try {
-    await mongoose.connection.close();
-    logger.info('MongoDB connection closed');
-    process.exit(0);
-  } catch (err) {
-    logger.error('Error during shutdown:', err);
-    process.exit(1);
-  }
-};
+const PORT = process.env.PORT || process.env.API_PORT || 8080;
+const server = app.listen(PORT, () => {
+  logger.info(`🚀 Server running on port ${PORT}`);
+});
 
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+// Graceful shutdown handlers...
+process.on('SIGTERM', () => {
+  logger.info('Received SIGTERM. Shutting down...');
+  server.close(() => {
+    const mongoose = require('mongoose');
+    mongoose.connection.close(false, () => {
+      logger.info('MongoDB disconnected. Exiting.');
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('Received SIGINT. Shutting down...');
+  server.close(() => {
+    const mongoose = require('mongoose');
+    mongoose.connection.close(false, () => {
+      logger.info('MongoDB disconnected. Exiting.');
+      process.exit(0);
+    });
+  });
+});
 
 process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err);
@@ -24,6 +39,3 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
-
-// Start the app
-require('./src/app');
