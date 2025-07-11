@@ -12,6 +12,10 @@ router.get('/', (req, res, next) => {
   CommunicationController.listMessages(req, res, next);
 });
 
+router.get('/health', (req, res) => {
+  res.status(200).json({ status: 'UP' });
+});
+
 // Retrieve a specific communication message
 router.get('/:id', CommunicationController.getMessage);
 

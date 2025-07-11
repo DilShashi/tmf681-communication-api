@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install --production
+RUN npm install --omit=dev
 
 # Bundle app source
 COPY . .
@@ -14,7 +14,7 @@ COPY . .
 # Set environment variables
 ENV NODE_ENV production
 ENV PORT=8080
-EXPOSE 8080
+EXPOSE $PORT
 
 
 # Create logs directory

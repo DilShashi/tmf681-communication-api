@@ -49,7 +49,7 @@ const connectWithRetry = async () => {
     logger.info('Connected to MongoDB successfully');
 
     const PORT = process.env.PORT || 8080;
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
     });
   } catch (err) {
@@ -99,6 +99,15 @@ process.on('unhandledRejection', (err) => {
 process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err);
   process.exit(1);
+});
+
+process.on('SIGTERM', () => {
+  server.close(() => {
+    mongoose.connection.close(false, () => {
+      logger.info('Server and MongoDB connection closed gracefully');
+      process.exit(0);
+    });
+  });
 });
 
 module.exports = app;
