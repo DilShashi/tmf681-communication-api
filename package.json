@@ -6,7 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node railway-start.js",
-    "build": "npm install --omit=dev",
+    "build": "npm install --omit=dev && npm prune --production",
     "watch": "nodemon src/app.js",
     "dev": "NODE_ENV=development nodemon src/app.js",
     "test": "NODE_ENV=test mocha tests/integration/**/*.test.js --exit",
@@ -15,7 +15,7 @@
     "docker:build": "docker build -t communication-service .",
     "docker:run": "docker run -p 8080:8080 -e NODE_ENV=production communication-service",
     "ctk": "cd ctk && npm install && npm start",
-    "railway:start": "node railway-start.js"
+    "railway:start": "node src/app.js"
   },
   "keywords": [
     "tmforum",

@@ -1,10 +1,35 @@
 // railway-start.js
 require('dotenv').config();
-const app = require('./src/app');
-const PORT = process.env.PORT || 8080;
-console.log(`Starting app on port ${PORT}`); // <-- This log is critical
+const { startServer } = require('./src/app');
+const logger = require('./src/utils/logger');
 
-app.listen(PORT); // <-- Very important: no callback here
+// Start the server with enhanced error handling
+const startApplication = async () => {
+  try {
+    const server = await startServer();
+    
+    // Additional server event listeners
+    server.on('error', (err) => {
+      logger.error('Server error:', err);
+    });
+    
+    server.on('close', () => {
+      logger.info('Server closed');
+    });
+  } catch (err) {
+    logger.error('Failed to start application:', err);
+    process.exit(1);
+  }
+};
 
-process.on('SIGTERM', () => console.log('SIGTERM received'));
-process.on('SIGINT', () => console.log('SIGINT received'));
+startApplication();
+
+// Global error handlers
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});

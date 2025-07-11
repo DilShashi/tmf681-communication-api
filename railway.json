@@ -1,13 +1,13 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm install --omit=dev",
+    "buildCommand": "npm run build",
     "installCommand": "npm install"
   },
   "start": {
-    "cmd": "node railway-start.js",
+    "cmd": "node src/app.js",
     "nixpacks": {
-      "start": "node railway-start.js"
+      "start": "node src/app.js"
     }
   },
   "variables": {
