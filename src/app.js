@@ -9,9 +9,6 @@ const config = require('./config/tmf-config');
 const logger = require('./utils/logger');
 const TMFErrorHandler = require('./utils/tmfErrorHandler');
 
-// Detect Railway environment
-const isRailway = process.env.RAILWAY_ENVIRONMENT_ID !== undefined;
-
 // Load all MongoDB models
 const loadModels = () => {
   require('./models/CommunicationMessage');
@@ -25,6 +22,8 @@ const loadModels = () => {
   require('./models/RelatedParty');
 };
 loadModels();
+
+const isRailway = process.env.RAILWAY_ENVIRONMENT_ID !== undefined;
 
 // Import route handlers
 const communicationRoutes = require('./routes/communicationRoutes');
@@ -40,8 +39,8 @@ app.use(helmet());
 
 // CORS configuration
 app.use(cors({
-  origin: isRailway 
-    ? [`https://${process.env.RAILWAY_STATIC_URL}`] 
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://tmf681-communication-api.up.railway.app'] 
     : '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Accept']
@@ -52,7 +51,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // HTTP request logging
-app.use(morgan(isRailway ? 'combined' : 'dev', { 
+app.use(morgan('combined', { 
   stream: {
     write: (message) => logger.info(message.trim())
   }
@@ -142,8 +141,8 @@ if (isRailway) {
   app.get('/railway-health', (req, res) => {
     res.status(200).json({
       status: 'OK',
-      service: process.env.RAILWAY_SERVICE_NAME,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      service: process.env.RAILWAY_SERVICE_NAME
     });
   });
 }
@@ -171,18 +170,24 @@ const startServer = async () => {
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
       if (isRailway) {
         logger.info('Running in Railway environment');
-        logger.info(`Service URL: https://${process.env.RAILWAY_STATIC_URL}`);
       }
     });
 
-    // Enhanced shutdown handler
+    // Enhanced shutdown handler with Railway-specific logic
     const shutdown = async (signal) => {
       logger.info(`Received ${signal}. Starting graceful shutdown...`);
       
+      // Set timeout for forced shutdown
+      const forceShutdownTimer = setTimeout(() => {
+        logger.error('Graceful shutdown timeout, forcing exit');
+        process.exit(1);
+      }, 10000); // 10 seconds timeout for Railway
+
       try {
         // Close server
         await new Promise((resolve) => {
           server.close((err) => {
+            clearTimeout(forceShutdownTimer);
             if (err) {
               logger.error('Error closing server:', err);
             } else {
@@ -191,13 +196,13 @@ const startServer = async () => {
             resolve();
           });
         });
-        
-        // Close MongoDB connection
+
+        // Close MongoDB connection with Railway-specific handling
         if (mongoose.connection.readyState === 1) {
-          await mongoose.connection.close(false);
+          await mongoose.connection.close(false); // force close
           logger.info('MongoDB connection closed');
         }
-        
+
         logger.info('Graceful shutdown complete');
         process.exit(0);
       } catch (err) {
@@ -206,13 +211,14 @@ const startServer = async () => {
       }
     };
 
-    // Signal handlers
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT', () => shutdown('SIGINT'));
-    
-    // Railway-specific handlers
+    // Signal handlers with Railway priority
     if (isRailway) {
-      process.on('SIGUSR2', () => shutdown('SIGUSR2'));
+      process.on('SIGTERM', () => shutdown('SIGTERM (Railway)'));
+      process.removeAllListeners('SIGINT'); // Remove default handler
+      process.on('SIGINT', () => shutdown('SIGINT (Railway)'));
+    } else {
+      process.on('SIGTERM', () => shutdown('SIGTERM'));
+      process.on('SIGINT', () => shutdown('SIGINT'));
     }
 
     return server;
