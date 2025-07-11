@@ -61,40 +61,43 @@ const connectWithRetry = async () => {
   const RETRY_DELAY = 5000;
   let retryCount = 0;
 
+  const getMongoOptions = () => ({
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    maxPoolSize: parseInt(process.env.DB_POOL_SIZE) || 10,
+    retryWrites: true,
+    retryReads: true,
+    authSource: 'admin'
+  });
+
   const connect = async () => {
     try {
       const mongoUrl = process.env.DB_URL || config.database.url;
       logger.info(`Connecting to MongoDB at ${mongoUrl.replace(/:[^:]*@/, ':***@')}`);
       
-      await mongoose.connect(mongoUrl, {
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 30000,
-        maxPoolSize: parseInt(process.env.DB_POOL_SIZE) || 10,
-        retryWrites: true,
-        retryReads: true
-      });
+      await mongoose.connect(mongoUrl, getMongoOptions());
       
       logger.info('MongoDB connection established');
       return true;
     } catch (err) {
-      logger.error(`MongoDB connection failed: ${err.message}`);
-      throw err;
+      logger.error(`MongoDB connection error: ${err.message}`);
+      
+      retryCount++;
+      if (retryCount < MAX_RETRIES) {
+        logger.warn(`Retry ${retryCount}/${MAX_RETRIES}. Retrying in ${RETRY_DELAY/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return connect();
+      } else {
+        logger.error('MongoDB connection failed after maximum retries');
+        throw err;
+      }
     }
   };
 
-  while (retryCount < MAX_RETRIES) {
-    try {
-      return await connect();
-    } catch (err) {
-      retryCount++;
-      if (retryCount < MAX_RETRIES) {
-        logger.warn(`Retrying connection (${retryCount}/${MAX_RETRIES})...`);
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-      } else {
-        logger.error('Max retries reached. Exiting...');
-        process.exit(1);
-      }
-    }
+  try {
+    await connect();
+  } catch (err) {
+    process.exit(1);
   }
 };
 
@@ -149,46 +152,5 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   TMFErrorHandler.handleError(err, req, res, next);
 });
-
-// Process event handlers
-process.on('unhandledRejection', (err) => {
-  logger.error('Unhandled Rejection:', err);
-});
-
-process.on('uncaughtException', (err) => {
-  logger.error('Uncaught Exception:', err);
-  process.exit(1);
-});
-
-process.on('SIGTERM', () => {
-  logger.info('Received SIGTERM. Gracefully shutting down...');
-  server.close(() => {
-    mongoose.connection.close(false, () => {
-      process.exit(0);
-    });
-  });
-});
-
-process.on('SIGINT', () => {
-  logger.info('Received SIGINT. Gracefully shutting down...');
-  server.close(() => {
-    mongoose.connection.close(false, () => {
-      process.exit(0);
-    });
-  });
-});
-
-// Start server
-// const PORT = process.env.PORT || config.api.port || 8080;
-// const server = app.listen(PORT, () => {
-//   logger.info(`Server running on port ${PORT}`);
-//   logger.info(`API base path: ${config.api.basePath}`);
-//   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-// });
-
-// server.on('error', (err) => {
-//   logger.error('Server error:', err);
-//   process.exit(1);
-// });
 
 module.exports = app;
