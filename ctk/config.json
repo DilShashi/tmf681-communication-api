@@ -1,8 +1,9 @@
 {
-  "url": "http://localhost:8080/tmf-api/communicationManagement/v4/",
+  "url": "https://tmf681-communication-api.up.railway.app/tmf-api/communicationManagement/v4/",
   "headers": {
     "Accept": "application/json",
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "User-Agent": "TMF681-CTK/4.0.0"
   },
   "payloads": {
     "@type": "CommunicationMessage",
@@ -16,32 +17,36 @@
       {
         "name": "$Parameter1",
         "value": "Mr. Jones",
-        "valueType": "string"
+        "valueType": "string",
+        "@type": "StringCharacteristic"
       },
       {
         "name": "$Parameter2",
         "value": "4G_LTE Discount 30%",
-        "valueType": "string"
+        "valueType": "string",
+        "@type": "StringCharacteristic"
       }
     ],
     "attachment": [
       {
-        "url": "https://serverlocation/files/1",
+        "url": "https://tmf681-communication-api.up.railway.app/files/1",
         "name": "File_XYZ_001",
-        "content": "...",
-        "attachmentType": "...",
-        "mimeType": "application/pdf"
+        "content": "base64-encoded-content-sample",
+        "attachmentType": "document",
+        "mimeType": "application/pdf",
+        "@type": "Attachment"
       }
     ],
     "sender": {
       "id": "10099",
       "name": "ABC Company",
       "phoneNumber": "10086",
+      "@type": "Sender",
       "party": {
         "role": "service provider",
         "partyOrPartyRole": {
           "id": "1066",
-          "href": "https://serverlocation/tmf-api/partyManagement/v4/organization/1",
+          "href": "https://tmf681-communication-api.up.railway.app/tmf-api/partyManagement/v4/organization/1",
           "name": "ABC Company",
           "@type": "Organization"
         },
@@ -53,17 +58,33 @@
         "id": "10234",
         "name": "John White",
         "phoneNumber": "008613811112222",
+        "@type": "Receiver",
         "party": {
           "role": "customer",
           "partyOrPartyRole": {
             "id": "991",
-            "href": "https://serverlocation/tmf-api/partyManagement/v4/individual/1",
+            "href": "https://tmf681-communication-api.up.railway.app/tmf-api/partyManagement/v4/individual/1",
             "name": "John White",
             "@type": "Individual"
           },
           "@type": "RelatedPartyOrPartyRole"
         }
       }
-    ]
+    ],
+    "@baseType": "CommunicationMessage",
+    "@schemaLocation": "http://www.tmforum.org/json-schemas/CommunicationMessage.schema.json"
+  },
+  "testConfig": {
+    "timeout": 10000,
+    "strictSSL": true,
+    "followRedirect": true,
+    "maxRedirects": 5,
+    "retryOnFailure": 3,
+    "retryDelay": 1000
+  },
+  "notificationEndpoints": {
+    "attributeChange": "https://tmf681-communication-api.up.railway.app/tmf-api/communicationManagement/v4/listener/communicationMessageAttributeValueChangeEvent",
+    "stateChange": "https://tmf681-communication-api.up.railway.app/tmf-api/communicationManagement/v4/listener/communicationMessageStateChangeEvent",
+    "hub": "https://tmf681-communication-api.up.railway.app/tmf-api/communicationManagement/v4/hub"
   }
 }

@@ -61,43 +61,40 @@ const connectWithRetry = async () => {
   const RETRY_DELAY = 5000;
   let retryCount = 0;
 
-  const getMongoOptions = () => ({
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-    maxPoolSize: parseInt(process.env.DB_POOL_SIZE) || 10,
-    retryWrites: true,
-    retryReads: true,
-    authSource: 'admin'
-  });
-
   const connect = async () => {
     try {
       const mongoUrl = process.env.DB_URL || config.database.url;
-      logger.info(`Attempting MongoDB connection to ${mongoUrl.replace(/:[^:]*@/, ':***@')}`);
+      logger.info(`Connecting to MongoDB at ${mongoUrl.replace(/:[^:]*@/, ':***@')}`);
       
-      await mongoose.connect(mongoUrl, getMongoOptions());
+      await mongoose.connect(mongoUrl, {
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 30000,
+        maxPoolSize: parseInt(process.env.DB_POOL_SIZE) || 10,
+        retryWrites: true,
+        retryReads: true
+      });
       
-      logger.info('MongoDB connection established successfully');
+      logger.info('MongoDB connection established');
       return true;
     } catch (err) {
-      logger.error(`MongoDB connection error: ${err.message}`);
-      
-      retryCount++;
-      if (retryCount < MAX_RETRIES) {
-        logger.warn(`Retry ${retryCount}/${MAX_RETRIES}. Retrying in ${RETRY_DELAY/1000} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-        return connect();
-      } else {
-        logger.error('MongoDB connection failed after maximum retries');
-        throw err;
-      }
+      logger.error(`MongoDB connection failed: ${err.message}`);
+      throw err;
     }
   };
 
-  try {
-    await connect();
-  } catch (err) {
-    process.exit(1);
+  while (retryCount < MAX_RETRIES) {
+    try {
+      return await connect();
+    } catch (err) {
+      retryCount++;
+      if (retryCount < MAX_RETRIES) {
+        logger.warn(`Retrying connection (${retryCount}/${MAX_RETRIES})...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      } else {
+        logger.error('Max retries reached. Exiting...');
+        process.exit(1);
+      }
+    }
   }
 };
 
