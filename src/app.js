@@ -9,6 +9,9 @@ const config = require('./config/tmf-config');
 const logger = require('./utils/logger');
 const TMFErrorHandler = require('./utils/tmfErrorHandler');
 
+// Detect Railway environment
+const isRailway = process.env.RAILWAY_ENVIRONMENT_ID !== undefined;
+
 // Load all MongoDB models
 const loadModels = () => {
   require('./models/CommunicationMessage');
@@ -22,8 +25,6 @@ const loadModels = () => {
   require('./models/RelatedParty');
 };
 loadModels();
-
-const isRailway = process.env.RAILWAY_ENVIRONMENT_ID !== undefined;
 
 // Import route handlers
 const communicationRoutes = require('./routes/communicationRoutes');
@@ -39,8 +40,8 @@ app.use(helmet());
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://tmf681-communication-api.up.railway.app'] 
+  origin: isRailway 
+    ? [`https://${process.env.RAILWAY_STATIC_URL}`] 
     : '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Accept']
@@ -51,7 +52,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // HTTP request logging
-app.use(morgan('combined', { 
+app.use(morgan(isRailway ? 'combined' : 'dev', { 
   stream: {
     write: (message) => logger.info(message.trim())
   }
@@ -136,6 +137,17 @@ app.get(`${config.api.basePath}/api-docs`, (req, res) => {
   res.redirect('https://www.tmforum.org/resources/specification/tmf681-communication-management-api-v4-0-0/');
 });
 
+// Railway-specific health check
+if (isRailway) {
+  app.get('/railway-health', (req, res) => {
+    res.status(200).json({
+      status: 'OK',
+      service: process.env.RAILWAY_SERVICE_NAME,
+      timestamp: new Date().toISOString()
+    });
+  });
+}
+
 // 404 Not Found handler
 app.use((req, res, next) => {
   TMFErrorHandler.handleNotFound(req, res, next);
@@ -159,6 +171,7 @@ const startServer = async () => {
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
       if (isRailway) {
         logger.info('Running in Railway environment');
+        logger.info(`Service URL: https://${process.env.RAILWAY_STATIC_URL}`);
       }
     });
 
@@ -166,17 +179,10 @@ const startServer = async () => {
     const shutdown = async (signal) => {
       logger.info(`Received ${signal}. Starting graceful shutdown...`);
       
-      // Set timeout for forced shutdown if graceful shutdown takes too long
-      const shutdownTimer = setTimeout(() => {
-        logger.error('Shutdown taking too long, forcing exit');
-        process.exit(1);
-      }, 30000); // 30 seconds timeout
-      
       try {
         // Close server
         await new Promise((resolve) => {
           server.close((err) => {
-            clearTimeout(shutdownTimer);
             if (err) {
               logger.error('Error closing server:', err);
             } else {
@@ -188,7 +194,7 @@ const startServer = async () => {
         
         // Close MongoDB connection
         if (mongoose.connection.readyState === 1) {
-          await mongoose.connection.close(false); // force close
+          await mongoose.connection.close(false);
           logger.info('MongoDB connection closed');
         }
         
@@ -207,14 +213,6 @@ const startServer = async () => {
     // Railway-specific handlers
     if (isRailway) {
       process.on('SIGUSR2', () => shutdown('SIGUSR2'));
-      
-      // Add heartbeat endpoint for Railway health checks
-      app.get('/railway-health', (req, res) => {
-        res.status(200).json({
-          status: 'OK',
-          timestamp: new Date().toISOString()
-        });
-      });
     }
 
     return server;

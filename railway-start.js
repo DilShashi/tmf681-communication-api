@@ -21,13 +21,6 @@ const startApplication = async () => {
       logger.info('Server instance closed');
     });
     
-    // Handle Railway's container lifecycle
-    if (process.env.RAILWAY_ENVIRONMENT_ID) {
-      process.on('beforeExit', (code) => {
-        logger.info(`Process will exit with code: ${code}`);
-      });
-    }
-    
     return server;
   } catch (err) {
     logger.error('Railway application failed to start:', err);
