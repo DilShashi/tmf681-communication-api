@@ -44,11 +44,11 @@ const receiverSchema = Joi.object({
   email: Joi.string().email().when('messageType', {
     is: 'Email',
     then: Joi.required(),
-    otherwise: Joi.optional()
+    otherwise: Joi.optional().allow('')
   }),
   id: Joi.string().description('ID of the receiver'),
   ip: Joi.string().description('IP address of the receiver'),
-  name: Joi.string().description('Name of the receiver'),
+  name: Joi.string().required().description('Name of the receiver'),
   party: Joi.object({
     href: Joi.string().uri(),
     id: Joi.string(),
@@ -62,7 +62,7 @@ const receiverSchema = Joi.object({
   phoneNumber: Joi.string().when('messageType', {
     is: 'SMS',
     then: Joi.required(),
-    otherwise: Joi.optional()
+    otherwise: Joi.optional().allow('')
   }),
   "@type": Joi.string().default('Receiver')
 }).options({ allowUnknown: true });

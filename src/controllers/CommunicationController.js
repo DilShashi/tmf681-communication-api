@@ -118,6 +118,10 @@ class CommunicationController {
 
   static async createMessage(req, res) {
     try {
+      // Transform form data to match API schema
+      if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+        req.body = transformFormData(req.body);
+      }
       const validationErrors = Validator.validateCommunicationMessage(req.body);
       if (validationErrors) {
         return res.status(400).json(
@@ -313,5 +317,34 @@ class CommunicationController {
     }
   }
 }
+
+// Helper function to transform form data
+function transformFormData(formData) {
+  const transformed = {
+    subject: formData.subject,
+    content: formData.content,
+    messageType: formData.messageType,
+    logFlag: formData.logFlag === 'on',
+    sender: {
+      name: formData['sender[name]']
+    }
+  };
+
+  // Process receivers
+  const receivers = [];
+  let i = 0;
+  while (formData[`receiver[${i}][name]`]) {
+    receivers.push({
+      name: formData[`receiver[${i}][name]`],
+      phoneNumber: formData[`receiver[${i}][phoneNumber]`] || undefined,
+      email: formData[`receiver[${i}][email]`] || undefined
+    });
+    i++;
+  }
+  transformed.receiver = receivers;
+
+  return transformed;
+}
+
 
 module.exports = CommunicationController;
