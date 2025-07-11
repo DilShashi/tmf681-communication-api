@@ -1,5 +1,5 @@
 {
-  "url": "https://tmf681-communication-api.up.railway.app/tmf-api/communicationManagement/v4/",
+  "url": "http://localhost:8080/tmf-api/communicationManagement/v4/",
   "headers": {
     "Accept": "application/json",
     "Content-Type": "application/json"

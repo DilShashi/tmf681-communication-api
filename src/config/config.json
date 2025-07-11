@@ -1,6 +1,6 @@
 {
   "api": {
-    "baseUrl": "https://tmf681-communication-api.up.railway.app",
+    "baseUrl": "http://localhost:8080",
     "basePath": "/tmf-api/communicationManagement/v4",
     "version": "4.0.0",
     "title": "Communication Management API",
@@ -13,17 +13,17 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "port": "$PORT"
+    "port": 8080
   },
   "database": {
-    "url": "mongodb://mongo:GpBZqZzBNqTJRzfdKfVPkiUdllZGFUNh@centerbeam.proxy.rlwy.net:59721/communication_db?authSource=admin",
+    "url": "mongodb://localhost:27017/communication_db",
     "options": {
-      "serverSelectionTimeoutMS": 5000,
-      "socketTimeoutMS": 45000
+      "useNewUrlParser": true,
+      "useUnifiedTopology": true
     }
   },
   "logging": {
-    "level": "info",
+    "level": "debug",
     "file": {
       "error": "logs/error.log",
       "combined": "logs/combined.log",

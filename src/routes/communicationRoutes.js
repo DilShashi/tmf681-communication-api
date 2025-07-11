@@ -1,4 +1,3 @@
-// src/routes/communicationRoutes.js
 const express = require('express');
 const router = express.Router();
 const CommunicationController = require('../controllers/CommunicationController');
@@ -10,10 +9,6 @@ router.get('/', (req, res, next) => {
   req.query.offset = req.query.offset || 0;
   req.query.limit = req.query.limit || 100;
   CommunicationController.listMessages(req, res, next);
-});
-
-router.get('/health', (req, res) => {
-  res.status(200).json({ status: 'UP' });
 });
 
 // Retrieve a specific communication message

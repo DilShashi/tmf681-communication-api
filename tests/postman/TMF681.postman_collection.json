@@ -1,0 +1,210 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-g1h2-i3j4k5l6m7n8",
+    "name": "TMF681 Communication Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for TM Forum Communication Management API v4.0.0"
+  },
+  "item": [
+    {
+      "name": "Communication Messages",
+      "item": [
+        {
+          "name": "List Communication Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/communicationMessage",
+              "host": ["{{base_url}}"],
+              "path": ["communicationMessage"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Communication Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Dear Customer, your order has been processed.\",\n  \"messageType\": \"SMS\",\n  \"receiver\": [\n    {\n      \"phoneNumber\": \"+1234567890\",\n      \"name\": \"John Doe\"\n    }\n  ],\n  \"sender\": {\n    \"phoneNumber\": \"+9876543210\",\n    \"name\": \"ABC Company\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communicationMessage",
+              "host": ["{{base_url}}"],
+              "path": ["communicationMessage"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Communication Message by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/communicationMessage/{{message_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["communicationMessage", "{{message_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Communication Message",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/merge-patch+json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"inProgress\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communicationMessage/{{message_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["communicationMessage", "{{message_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Communication Message",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/communicationMessage/{{message_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["communicationMessage", "{{message_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Publish State Change Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"communicationMessage\": {\n    \"id\": \"{{message_id}}\",\n    \"state\": \"completed\"\n  },\n  \"eventType\": \"CommunicationMessageStateChangeEvent\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notification/state-change",
+              "host": ["{{base_url}}"],
+              "path": ["notification", "state-change"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hub",
+      "item": [
+        {
+          "name": "Register Listener",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callback\": \"http://your-listener-url.com/events\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/hub",
+              "host": ["{{base_url}}"],
+              "path": ["hub"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/tmf-api/communicationManagement/v4"
+    },
+    {
+      "key": "message_id",
+      "value": "",
+      "description": "First create a message via POST /communicationMessage and copy its ID here"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Ensure message_id is set for dependent requests",
+          "if (!pm.variables.get('message_id') && pm.request.url.path.some(p => p.includes('{{message_id}}'))) {",
+          "    pm.request.url.path.forEach((path, i) => {",
+          "        if (path === '{{message_id}}') pm.request.url.path[i] = '';",
+          "    });",
+          "}"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ]
+}
