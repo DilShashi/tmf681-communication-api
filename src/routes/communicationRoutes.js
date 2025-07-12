@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const CommunicationController = require('../controllers/CommunicationController');
 
-// API Routes
+// API Routes only - no UI routes here
 router.get('/', (req, res, next) => {
   req.query.fields = req.query.fields || '';
   req.query.offset = req.query.offset || 0;
@@ -12,10 +12,7 @@ router.get('/', (req, res, next) => {
 }, CommunicationController.listMessages);
 
 router.get('/:id', CommunicationController.getMessage);
-router.post('/', 
-  express.json({ limit: '10mb' }),
-  express.urlencoded({ extended: true, limit: '10mb' }),
-  CommunicationController.createMessage);
+router.post('/', CommunicationController.createMessage);
 router.patch('/:id', CommunicationController.updateMessage);
 router.delete('/:id', CommunicationController.deleteMessage);
 

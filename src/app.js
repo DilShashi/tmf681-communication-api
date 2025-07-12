@@ -8,7 +8,7 @@ const helmet = require('helmet');
 const config = require('./config/tmf-config');
 const logger = require('./utils/logger');
 const TMFErrorHandler = require('./utils/tmfErrorHandler');
-const ViewController = require('./controllers/ViewController'); // Add this line
+const ViewController = require('./controllers/ViewController');
 
 // Load all MongoDB models
 const loadModels = () => {
@@ -110,11 +110,14 @@ mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB connection lost');
 });
 
+// Add this route handler before your API routes
+app.get(`${config.api.basePath}/`, ViewController.getApiHome);
+
 // UI Routes
 app.get('/', ViewController.getApiHome);
-app.get('/communicationMessage/create', ViewController.getMessageForm);
-app.get('/communicationMessage/messages', ViewController.listMessagesUI);
-app.get('/communicationMessage/messages/:id', ViewController.getMessageUI);
+app.get(`${config.api.basePath}/communicationMessage/create`, ViewController.getMessageForm);
+app.get(`${config.api.basePath}/communicationMessage/messages`, ViewController.listMessagesUI);
+app.get(`${config.api.basePath}/communicationMessage/messages/:id`, ViewController.getMessageUI);
 
 // API Routes
 app.use(`${config.api.basePath}/communicationMessage`, communicationRoutes);

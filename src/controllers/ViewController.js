@@ -24,6 +24,7 @@ class ViewController {
       
       res.status(200).set('Content-Type', 'text/html').send(html);
     } catch (err) {
+      logger.error(`Error loading API home: ${err.message}`);
       res.status(500).json({
         code: 500,
         reason: "Internal Server Error",
