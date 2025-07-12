@@ -7,7 +7,6 @@ const CommunicationMessage = require('../models/CommunicationMessage');
 class ViewController {
   static async getApiHome(req, res) {
     try {
-      const isRootPath = req.path === '/';
       const htmlPath = path.join(__dirname, '../views/api-home.html');
       let html = fs.readFileSync(htmlPath, 'utf8');
       
@@ -16,10 +15,8 @@ class ViewController {
         .sort({ createdAt: -1 })
         .lean();
       
-      const basePath = isRootPath ? '' : config.api.basePath;
-      
       html = html
-        .replace(/{{API_BASE_PATH}}/g, basePath)
+        .replace(/{{API_BASE_PATH}}/g, config.api.basePath)
         .replace(/{{API_VERSION}}/g, config.api.version)
         .replace(/{{API_TITLE}}/g, config.api.title)
         .replace(/{{TIMESTAMP}}/g, new Date().toISOString())
@@ -51,6 +48,7 @@ class ViewController {
       
       res.status(200).set('Content-Type', 'text/html').send(html);
     } catch (err) {
+      console.error('Error loading messages:', err);
       res.status(500).json({
         code: 500,
         reason: "Internal Server Error",

@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const config = require('./config/tmf-config');
 const logger = require('./utils/logger');
 const TMFErrorHandler = require('./utils/tmfErrorHandler');
+const ViewController = require('./controllers/ViewController'); // Add this line
 
 // Load all MongoDB models
 const loadModels = () => {
@@ -22,8 +23,6 @@ const loadModels = () => {
   require('./models/RelatedParty');
 };
 loadModels();
-
-const isRailway = process.env.RAILWAY_ENVIRONMENT_ID !== undefined;
 
 // Import route handlers
 const communicationRoutes = require('./routes/communicationRoutes');
@@ -111,12 +110,13 @@ mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB connection lost');
 });
 
-// Add this before the API routes
-app.get(`${config.api.basePath}/`, (req, res) => {
-  res.redirect(`${config.api.basePath}/communicationMessage`);
-});
+// UI Routes
+app.get('/', ViewController.getApiHome);
+app.get('/communicationMessage/create', ViewController.getMessageForm);
+app.get('/communicationMessage/messages', ViewController.listMessagesUI);
+app.get('/communicationMessage/messages/:id', ViewController.getMessageUI);
 
-// API routes
+// API Routes
 app.use(`${config.api.basePath}/communicationMessage`, communicationRoutes);
 app.use(`${config.api.basePath}/notification`, notificationRoutes);
 app.use(`${config.api.basePath}/hub`, hubRoutes);
@@ -171,7 +171,7 @@ const startServer = async () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`API base path: ${config.api.basePath}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      if (isRailway) {
+      if (process.env.RAILWAY_ENVIRONMENT_ID) {
         logger.info('Running in Railway environment');
       }
     });
