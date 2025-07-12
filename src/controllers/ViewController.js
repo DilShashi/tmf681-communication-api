@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const config = require('../config/tmf-config');
 const CommunicationMessage = require('../models/CommunicationMessage');
+const logger = require('../utils/logger');
 
 class ViewController {
   static async getApiHome(req, res) {
@@ -38,6 +39,10 @@ class ViewController {
     try {
       const messages = await CommunicationMessage.find()
         .sort({ createdAt: -1 })
+        .populate('attachment')
+        .populate('characteristic')
+        .populate('receiver')
+        .populate('sender')
         .lean();
       
       const htmlPath = path.join(__dirname, '../views/message-list.html');
@@ -49,7 +54,7 @@ class ViewController {
       
       res.status(200).set('Content-Type', 'text/html').send(html);
     } catch (err) {
-      console.error('Error loading messages:', err);
+      logger.error(`Error loading messages: ${err.message}`);
       res.status(500).json({
         code: 500,
         reason: "Internal Server Error",
@@ -61,7 +66,13 @@ class ViewController {
 
   static async getMessageUI(req, res) {
     try {
-      const message = await CommunicationMessage.findById(req.params.id).lean();
+      const message = await CommunicationMessage.findById(req.params.id)
+        .populate('attachment')
+        .populate('characteristic')
+        .populate('receiver')
+        .populate('sender')
+        .lean();
+      
       if (!message) {
         return res.status(404).send('Message not found');
       }
@@ -75,6 +86,7 @@ class ViewController {
       
       res.status(200).set('Content-Type', 'text/html').send(html);
     } catch (err) {
+      logger.error(`Error loading message: ${err.message}`);
       res.status(500).json({
         code: 500,
         reason: "Internal Server Error",

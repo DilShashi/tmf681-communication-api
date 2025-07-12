@@ -30,6 +30,56 @@
       border-radius: 4px;
     }
   </style>
+  <script>
+    async function promptForMessageId(action = 'view') {
+      const id = prompt('Enter Message ID:');
+      if (id) {
+        if (action === 'delete') {
+          if (confirm('Are you sure you want to delete this message?')) {
+            try {
+              const response = await fetch(`{{API_BASE_PATH}}/communicationMessage/${id}`, {
+                method: 'DELETE'
+              });
+              if (response.ok) {
+                alert('Message deleted successfully');
+                window.location.reload();
+              } else {
+                const error = await response.json();
+                alert(`Error: ${error.message}`);
+              }
+            } catch (error) {
+              alert('Failed to delete message: ' + error.message);
+            }
+          }
+        } else if (action === 'update') {
+          const newState = prompt('Enter new state (initial, inProgress, completed, cancelled, failed):');
+          if (newState) {
+            try {
+              const response = await fetch(`{{API_BASE_PATH}}/communicationMessage/${id}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ state: newState })
+              });
+              if (response.ok) {
+                const result = await response.json();
+                alert(`Message updated to state: ${result.state}`);
+                window.location.href = `{{API_BASE_PATH}}/communicationMessage/messages/${id}`;
+              } else {
+                const error = await response.json();
+                alert(`Error: ${error.message}`);
+              }
+            } catch (error) {
+              alert('Failed to update message: ' + error.message);
+            }
+          }
+        } else {
+          window.location.href = `{{API_BASE_PATH}}/communicationMessage/messages/${id}`;
+        }
+      }
+    }
+  </script>
 </head>
 
 <body>
