@@ -30,56 +30,6 @@
       border-radius: 4px;
     }
   </style>
-  <script>
-    async function promptForMessageId(action = 'view') {
-      const id = prompt('Enter Message ID:');
-      if (id) {
-        if (action === 'delete') {
-          if (confirm('Are you sure you want to delete this message?')) {
-            try {
-              const response = await fetch(`{{API_BASE_PATH}}/communicationMessage/${id}`, {
-                method: 'DELETE'
-              });
-              if (response.ok) {
-                alert('Message deleted successfully');
-                window.location.reload();
-              } else {
-                const error = await response.json();
-                alert(`Error: ${error.message}`);
-              }
-            } catch (error) {
-              alert('Failed to delete message: ' + error.message);
-            }
-          }
-        } else if (action === 'update') {
-          const newState = prompt('Enter new state (initial, inProgress, completed, cancelled, failed):');
-          if (newState) {
-            try {
-              const response = await fetch(`{{API_BASE_PATH}}/communicationMessage/${id}`, {
-                method: 'PATCH',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ state: newState })
-              });
-              if (response.ok) {
-                const result = await response.json();
-                alert(`Message updated to state: ${result.state}`);
-                window.location.href = `{{API_BASE_PATH}}/communicationMessage/messages/${id}`;
-              } else {
-                const error = await response.json();
-                alert(`Error: ${error.message}`);
-              }
-            } catch (error) {
-              alert('Failed to update message: ' + error.message);
-            }
-          }
-        } else {
-          window.location.href = `{{API_BASE_PATH}}/communicationMessage/messages/${id}`;
-        }
-      }
-    }
-  </script>
 </head>
 
 <body>
@@ -225,26 +175,52 @@
     }
 
     function promptForUpdate() {
-      alert('Please use the API directly with a PATCH request');
-    }
-
-    function promptForDelete() {
-      const id = prompt('Enter Message ID to delete:');
-      if (id) {
-        if (confirm('Are you sure you want to delete this message?')) {
-          fetch(`${window.location.pathname}/${id}`, {
-            method: 'DELETE'
-          }).then(response => {
-            if (response.ok) {
-              alert('Message deleted successfully');
-              window.location.reload();
-            } else {
-              alert('Error deleting message');
-            }
-          });
-        }
+    const id = prompt('Enter Message ID to update:');
+    if (id) {
+      const newState = prompt('Enter new state (initial, inProgress, completed, cancelled, failed):');
+      if (newState) {
+        fetch(`${window.location.pathname}/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ state: newState })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.id) {
+            alert('Message updated successfully!');
+            window.location.reload();
+          } else {
+            alert('Error updating message: ' + (data.message || 'Unknown error'));
+          }
+        })
+        .catch(error => alert('Error: ' + error.message));
       }
     }
+  }
+
+    function promptForDelete() {
+    const id = prompt('Enter Message ID to delete:');
+    if (id) {
+      if (confirm('Are you sure you want to delete this message?')) {
+        fetch(`${window.location.pathname}/${id}`, {
+          method: 'DELETE'
+        })
+        .then(response => {
+          if (response.ok) {
+            alert('Message deleted successfully');
+            window.location.reload();
+          } else {
+            response.json().then(data => {
+              alert('Error deleting message: ' + (data.message || 'Unknown error'));
+            });
+          }
+        })
+        .catch(error => alert('Error: ' + error.message));
+      }
+    }
+  }
     // Update the delete functionality to use correct path
     fetch(`communicationMessage/${id}`, {
       method: 'DELETE'

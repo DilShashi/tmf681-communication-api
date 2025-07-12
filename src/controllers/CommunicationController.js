@@ -124,6 +124,15 @@ class CommunicationController {
         messageData = transformFormData(req.body);
       }
 
+      // Ensure receiver array is properly formatted
+      if (!Array.isArray(messageData.receiver)) {
+        if (messageData.receiver) {
+          messageData.receiver = [messageData.receiver];
+        } else {
+          messageData.receiver = [];
+        }
+      }
+
       const validationErrors = Validator.validateCommunicationMessage(messageData);
       if (validationErrors) {
         return res.status(400).json(

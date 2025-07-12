@@ -133,7 +133,10 @@ const createCommunicationMessageSchema = Joi.object({
   tryTimes: Joi.number().integer().min(1).default(1),
   attachment: Joi.array().items(attachmentSchema),
   characteristic: Joi.array().items(characteristicSchema),
-  receiver: Joi.array().items(receiverSchema).min(1).required(),
+  receiver: Joi.alternatives().try(
+    Joi.array().items(receiverSchema).min(1),
+    receiverSchema
+  ).required(),
   sender: senderSchema.required(),
   "@baseType": Joi.string(),
   "@schemaLocation": Joi.string().uri(),

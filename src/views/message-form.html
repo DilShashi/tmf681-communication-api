@@ -89,49 +89,49 @@
   <script>
      // Add this new function to handle form submission
     document.getElementById('messageForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const formData = {
-        subject: document.getElementById('subject').value,
-        content: document.getElementById('content').value,
-        messageType: document.getElementById('messageType').value,
-        sender: {
-          name: document.querySelector('[name="sender[name]"]').value
-        },
-        receiver: []
-      };
+    e.preventDefault();
+    
+    const formData = {
+      subject: document.getElementById('subject').value,
+      content: document.getElementById('content').value,
+      messageType: document.getElementById('messageType').value,
+      sender: {
+        name: document.querySelector('[name="sender[name]"]').value
+      },
+      receiver: []
+    };
 
-      // Collect receivers
-      const receiverGroups = document.querySelectorAll('.receiver-group');
-      receiverGroups.forEach(group => {
-        const receiver = {
-          name: group.querySelector('[name^="receiver["][name$="[name]"]').value,
-          phoneNumber: group.querySelector('[name^="receiver["][name$="[phoneNumber]"]').value,
-          email: group.querySelector('[name^="receiver["][name$="[email]"]').value
-        };
-        formData.receiver.push(receiver);
+    // Collect all receivers
+    document.querySelectorAll('.receiver-group').forEach((group, index) => {
+      const receiver = {
+        name: group.querySelector(`[name="receiver[${index}][name]"]`).value,
+        phoneNumber: group.querySelector(`[name="receiver[${index}][phoneNumber]"]`)?.value,
+        email: group.querySelector(`[name="receiver[${index}][email]"]`)?.value
+      };
+      formData.receiver.push(receiver);
+    });
+
+    try {
+      const response = await fetch(`${window.location.origin}${window.location.pathname.replace('/create', '')}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
       });
 
-      try {
-        const response = await fetch('{{API_BASE_PATH}}/communicationMessage', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
-        });
-
-        const result = await response.json();
-        
-        if (response.ok) {
-          window.location.href = `{{API_BASE_PATH}}/communicationMessage/messages/${result.id}`;
-        } else {
-          alert(`Error: ${result.message || 'Failed to create message'}`);
-        }
-      } catch (error) {
-        alert('Failed to submit form: ' + error.message);
+      const result = await response.json();
+      
+      if (response.ok) {
+        alert('Message created successfully!');
+        window.location.href = `${window.location.origin}${window.location.pathname.replace('/create', '')}/messages/${result.id}`;
+      } else {
+        alert(`Error: ${result.message || 'Failed to create message'}`);
       }
-    }); 
+    } catch (error) {
+      alert('Failed to submit form: ' + error.message);
+    }
+  }); 
 
     // Dynamic field handling based on message type
     document.getElementById('messageType').addEventListener('change', function() {
