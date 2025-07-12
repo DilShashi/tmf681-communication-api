@@ -15,11 +15,13 @@ router.get('/communicationMessage', (req, res, next) => {
   req.query.fields = req.query.fields || '';
   req.query.offset = req.query.offset || 0;
   req.query.limit = req.query.limit || 100;
-  CommunicationController.listMessages(req, res, next);
-});
+  next();
+}, CommunicationController.listMessages);
 
 router.get('/communicationMessage/:id', CommunicationController.getMessage);
-router.post('/communicationMessage', CommunicationController.createMessage);
+router.post('/communicationMessage', 
+  express.urlencoded({ extended: true }),
+  CommunicationController.createMessage);
 router.patch('/communicationMessage/:id', CommunicationController.updateMessage);
 router.delete('/communicationMessage/:id', CommunicationController.deleteMessage);
 

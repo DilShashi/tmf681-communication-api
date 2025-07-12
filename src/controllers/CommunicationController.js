@@ -119,19 +119,22 @@ class CommunicationController {
   static async createMessage(req, res) {
     try {
       // Transform form data to match API schema
+      let messageData = req.body;
       if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
-        req.body = transformFormData(req.body);
+        messageData = transformFormData(req.body);
       }
-      const validationErrors = Validator.validateCommunicationMessage(req.body);
+
+      const validationErrors = Validator.validateCommunicationMessage(messageData);
       if (validationErrors) {
         return res.status(400).json(
           TMFErrorHandler.createTMFError(400, 'Validation failed', validationErrors)
         );
       }
 
-      const attachments = req.body.attachment && req.body.attachment.length > 0 
+      // Process attachments if present
+      const attachments = messageData.attachment && Array.isArray(messageData.attachment) 
         ? await Promise.all(
-            req.body.attachment.map(async attachmentData => {
+            messageData.attachment.map(async attachmentData => {
               const attachment = new Attachment({
                 ...attachmentData,
                 mimeType: attachmentData.mimeType || 'application/octet-stream',
@@ -143,9 +146,10 @@ class CommunicationController {
           )
         : [];
 
-      const characteristics = req.body.characteristic && req.body.characteristic.length > 0
+      // Process characteristics if present
+      const characteristics = messageData.characteristic && Array.isArray(messageData.characteristic)
         ? await Promise.all(
-            req.body.characteristic.map(async charData => {
+            messageData.characteristic.map(async charData => {
               const characteristic = new Characteristic({
                 ...charData,
                 valueType: charData.valueType || 'string',
@@ -157,8 +161,9 @@ class CommunicationController {
           )
         : [];
 
+      // Process receivers
       const receivers = await Promise.all(
-        req.body.receiver.map(async receiverData => {
+        messageData.receiver.map(async receiverData => {
           const receiver = new Receiver({
             ...receiverData,
             "@type": "Receiver"
@@ -168,33 +173,38 @@ class CommunicationController {
         })
       );
 
+      // Process sender
       const sender = new Sender({
-        ...req.body.sender,
+        ...messageData.sender,
         "@type": "Sender"
       });
       const savedSender = await sender.save();
 
+      // Create the message
       const newMessage = new CommunicationMessage({
-        ...req.body,
+        ...messageData,
         attachment: attachments,
         characteristic: characteristics,
         receiver: receivers,
         sender: savedSender._id,
         "@type": "CommunicationMessage",
-        state: req.body.state || 'initial',
-        logFlag: req.body.logFlag || false,
-        tryTimes: req.body.tryTimes || 1
+        state: messageData.state || 'initial',
+        logFlag: messageData.logFlag || false,
+        tryTimes: messageData.tryTimes || 1
       });
 
       const savedMessage = await newMessage.save();
       
+      // Set href if not provided
       if (!savedMessage.href) {
         savedMessage.href = `${config.api.baseUrl}${config.api.basePath}/communicationMessage/${savedMessage.id}`;
         await savedMessage.save();
       }
       
+      // Publish state change event
       await publishStateChangeEvent(savedMessage, 'initial');
       
+      // Return the created message
       const populatedMessage = await CommunicationMessage.findById(savedMessage._id)
         .populate('attachment')
         .populate({
@@ -209,10 +219,12 @@ class CommunicationController {
         .lean()
         .exec();
 
-      res.status(201).json({
-        ...populatedMessage,
-        href: populatedMessage.href || `${config.api.baseUrl}${config.api.basePath}/communicationMessage/${populatedMessage.id}`
-      });
+      // Handle different response types
+      if (req.headers.accept === 'text/html') {
+        return res.redirect(`${config.api.basePath}/messages/${populatedMessage.id}`);
+      }
+      
+      res.status(201).json(populatedMessage);
     } catch (error) {
       logger.error(`Error creating message: ${error.message}`);
       res.status(500).json(

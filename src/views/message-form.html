@@ -27,7 +27,7 @@
   <div class="container">
     <div class="form-container">
       <h2 class="mb-4">Create New Communication Message</h2>
-      <form id="messageForm" action="{{API_BASE_PATH}}/communicationMessage" method="POST">
+      <form id="messageForm" action="{{API_BASE_PATH}}/communicationMessage" method="POST" enctype="application/x-www-form-urlencoded">
         <div class="mb-3">
           <label for="subject" class="form-label">Subject</label>
           <input type="text" class="form-control" id="subject" name="subject" required>
@@ -87,6 +87,38 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+     // Add this new function to handle form submission
+    document.getElementById('messageForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const formObject = {};
+      formData.forEach((value, key) => {
+        formObject[key] = value;
+      });
+
+      try {
+        const response = await fetch(this.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams(formObject)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          alert('Message created successfully!');
+          window.location.href = `${window.location.pathname}/messages/${result.id}`;
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.message}`);
+        }
+      } catch (error) {
+        alert('Failed to submit form: ' + error.message);
+      }
+    }); 
+
     // Dynamic field handling based on message type
     document.getElementById('messageType').addEventListener('change', function() {
       const messageType = this.value;
