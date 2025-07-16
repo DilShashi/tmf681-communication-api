@@ -134,6 +134,7 @@ class ViewController {
       });
     }
   }
+
 }
 
 module.exports = ViewController;

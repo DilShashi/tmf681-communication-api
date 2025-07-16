@@ -7,15 +7,20 @@
   <title>API Documentation - Swagger UI</title>
   <link rel="stylesheet" href="/swagger-ui/swagger-ui.css">
   <style>
-    .swagger-ui .topbar {
-      background-color: #1e40af;
-      padding: 10px 0;
+    /* Isolated styles only for Swagger UI */
+    html {
+      box-sizing: border-box;
+      overflow: -moz-scrollbars-vertical;
+      overflow-y: scroll;
     }
-    .swagger-ui .topbar .download-url-wrapper {
-      display: none;
+    *,
+    *:before,
+    *:after {
+      box-sizing: inherit;
     }
-    #swagger-ui {
-      padding: 20px 0;
+    body {
+      margin: 0;
+      background: #fafafa;
     }
     .back-button {
       position: fixed;
@@ -48,9 +53,7 @@
           SwaggerUIStandalonePreset
         ],
         layout: "StandaloneLayout",
-        deepLinking: true,
-        showExtensions: true,
-        showCommonExtensions: true
+        deepLinking: true
       });
       
       window.ui = ui;

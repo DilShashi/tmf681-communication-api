@@ -35,25 +35,29 @@ const clientRoutes = require('./routes/clientRoutes');
 const app = express();
 
 // Updated Security middleware with CSP configuration
+// Security middleware with carefully configured CSP
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
-        "'unsafe-inline'"
+        "'unsafe-inline'", // Required for Swagger UI
+        "https://cdn.jsdelivr.net" // For Bootstrap if used
       ],
       styleSrc: [
         "'self'",
-        "'unsafe-inline'"
+        "'unsafe-inline'", // Required for Swagger UI
+        "https://cdn.jsdelivr.net" // For Bootstrap if used
       ],
-      imgSrc: ["'self'", "data:"],
-      fontSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https://validator.swagger.io"],
+      fontSrc: ["'self'", "https://cdn.jsdelivr.net"],
       connectSrc: ["'self'"]
     }
-  },
-  crossOriginEmbedderPolicy: false
+  }
 }));
+
+app.use(express.static(path.join(__dirname, '../public')));
 
 // CORS configuration
 app.use(cors({
@@ -77,6 +81,7 @@ app.use(morgan('combined', {
 
 // Serve static files
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../views')));
 
 // MongoDB connection with retry logic
 const connectWithRetry = async () => {
@@ -131,6 +136,7 @@ mongoose.connection.on('connected', () => {
 mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB connection lost');
 });
+
 
 // Add this route handler before your API routes
 app.get(`${config.api.basePath}/`, ViewController.getApiHome);
