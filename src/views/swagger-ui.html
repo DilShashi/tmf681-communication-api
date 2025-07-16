@@ -1,0 +1,60 @@
+<!-- src/views/swagger-ui.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation - Swagger UI</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css">
+  <style>
+    .swagger-ui .topbar {
+      background-color: #1e40af;
+      padding: 10px 0;
+    }
+    .swagger-ui .topbar .download-url-wrapper {
+      display: none;
+    }
+    #swagger-ui {
+      padding: 20px 0;
+    }
+    .back-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #1e40af;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <a href="{{API_BASE_PATH}}" class="back-button">← Back to API</a>
+  <div id="swagger-ui"></div>
+  
+  <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = function() {
+      const ui = SwaggerUIBundle({
+        url: "{{API_BASE_PATH}}/api-spec.yaml",
+        dom_id: '#swagger-ui',
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "StandaloneLayout",
+        deepLinking: true,
+        showExtensions: true,
+        showCommonExtensions: true
+      });
+      
+      window.ui = ui;
+    };
+  </script>
+</body>
+</html>

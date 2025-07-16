@@ -35,6 +35,25 @@ class ViewController {
     }
   }
 
+  static async getSwaggerUI(req, res) {
+    try {
+      const htmlPath = path.join(__dirname, '../views/swagger-ui.html');
+      let html = fs.readFileSync(htmlPath, 'utf8');
+      
+      html = html.replace(/{{API_BASE_PATH}}/g, config.api.basePath);
+      
+      res.status(200).set('Content-Type', 'text/html').send(html);
+    } catch (err) {
+      logger.error(`Error loading Swagger UI: ${err.message}`);
+      res.status(500).json({
+        code: 500,
+        reason: "Internal Server Error",
+        message: "Could not load API documentation",
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
   static async listMessagesUI(req, res) {
     try {
       const messages = await CommunicationMessage.find()

@@ -110,6 +110,9 @@ mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB connection lost');
 });
 
+// Add this route handler with the other UI routes
+app.get(`${config.api.basePath}/api-docs/swagger`, ViewController.getSwaggerUI);
+
 // Add this route handler before your API routes
 app.get(`${config.api.basePath}/`, ViewController.getApiHome);
 
@@ -137,6 +140,11 @@ app.get(`${config.api.basePath}/health`, (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
+});
+
+// API documentation YAML
+app.get(`${config.api.basePath}/api-spec.yaml`, (req, res) => {
+  res.sendFile(path.join(__dirname, 'views/api-spec.yaml'));
 });
 
 // API documentation redirect

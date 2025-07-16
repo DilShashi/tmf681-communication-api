@@ -1,0 +1,112 @@
+# src/views/api-spec.yaml
+openapi: 3.0.0
+info:
+  title: Communication Management API
+  description: TM Forum Communication Management API v4.0.0 implementation
+  version: 4.0.0
+  contact:
+    name: API Support
+    email: support@tmforum.org
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://tmf681-communication-api.up.railway.app/tmf-api/communicationManagement/v4
+    description: Production server
+tags:
+  - name: communicationMessage
+    description: Operations about communication messages
+paths:
+  /communicationMessage:
+    get:
+      tags: [communicationMessage]
+      summary: List or find CommunicationMessage objects
+      description: This operation list or find CommunicationMessage entities
+      parameters:
+        - $ref: '#/components/parameters/fieldsParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunicationMessage'
+    post:
+      tags: [communicationMessage]
+      summary: Creates a CommunicationMessage
+      description: This operation creates a CommunicationMessage entity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunicationMessage_Create'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationMessage'
+components:
+  parameters:
+    fieldsParam:
+      name: fields
+      in: query
+      description: Comma-separated properties to include in response
+      required: false
+      schema:
+        type: string
+    offsetParam:
+      name: offset
+      in: query
+      description: Requested index for start of resources to be provided in response
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limitParam:
+      name: limit
+      in: query
+      description: Requested number of resources to be provided in response
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 100
+  schemas:
+    CommunicationMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of Communication Message
+        href:
+          type: string
+          format: uri
+          description: Hypertext Reference of the Communication Message
+        content:
+          type: string
+          description: The content of the communication message
+        messageType:
+          type: string
+          enum: [SMS, Email, MobileAppPush]
+        state:
+          type: string
+          enum: [initial, inProgress, completed, cancelled, failed]
+          default: initial
+    CommunicationMessage_Create:
+      type: object
+      required: [content, messageType]
+      properties:
+        content:
+          type: string
+          description: The content of the communication message
+        messageType:
+          type: string
+          enum: [SMS, Email, MobileAppPush]
