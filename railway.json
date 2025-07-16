@@ -13,5 +13,11 @@
   "variables": {
     "NODE_ENV": "production",
     "PORT": "8080"
-  }
+  },
+  "include": [
+    "src",
+    "public",
+    "package.json",
+    "package-lock.json"
+  ]
 }

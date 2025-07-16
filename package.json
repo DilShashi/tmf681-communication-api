@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node railway-start.js",
+    "postinstall": "node scripts/copy-swagger-assets.js",
     "build": "npm install --omit=dev && npm prune --production",
     "watch": "nodemon src/app.js",
     "dev": "NODE_ENV=development nodemon src/app.js",
@@ -32,7 +33,7 @@
     "helmet": "^7.2.0",
     "joi": "^17.13.3",
     "mongoose": "^8.16.2",
-    "swagger-ui-dist": "^4.19.1",
+    "swagger-ui-dist": "^4.5.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {

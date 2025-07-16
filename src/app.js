@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const path = require('path');
 const config = require('./config/tmf-config');
 const logger = require('./utils/logger');
 const TMFErrorHandler = require('./utils/tmfErrorHandler');
@@ -33,8 +34,26 @@ const clientRoutes = require('./routes/clientRoutes');
 // Initialize Express application
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// Updated Security middleware with CSP configuration
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'"
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'"
+      ],
+      imgSrc: ["'self'", "data:"],
+      fontSrc: ["'self'"],
+      connectSrc: ["'self'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false
+}));
 
 // CORS configuration
 app.use(cors({
@@ -55,6 +74,9 @@ app.use(morgan('combined', {
     write: (message) => logger.info(message.trim())
   }
 }));
+
+// Serve static files
+app.use(express.static(path.join(__dirname, '../public')));
 
 // MongoDB connection with retry logic
 const connectWithRetry = async () => {
@@ -110,9 +132,6 @@ mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB connection lost');
 });
 
-// Add this route handler with the other UI routes
-app.get(`${config.api.basePath}/api-docs/swagger`, ViewController.getSwaggerUI);
-
 // Add this route handler before your API routes
 app.get(`${config.api.basePath}/`, ViewController.getApiHome);
 
@@ -121,12 +140,18 @@ app.get('/', ViewController.getApiHome);
 app.get(`${config.api.basePath}/communicationMessage/create`, ViewController.getMessageForm);
 app.get(`${config.api.basePath}/communicationMessage/messages`, ViewController.listMessagesUI);
 app.get(`${config.api.basePath}/communicationMessage/messages/:id`, ViewController.getMessageUI);
+app.get(`${config.api.basePath}/api-docs/swagger`, ViewController.getSwaggerUI);
 
 // API Routes
 app.use(`${config.api.basePath}/communicationMessage`, communicationRoutes);
 app.use(`${config.api.basePath}/notification`, notificationRoutes);
 app.use(`${config.api.basePath}/hub`, hubRoutes);
 app.use(`${config.api.basePath}/listener`, clientRoutes);
+
+// API documentation YAML
+app.get(`${config.api.basePath}/api-spec.yaml`, (req, res) => {
+  res.sendFile(path.join(__dirname, 'views/api-spec.yaml'));
+});
 
 // Health check endpoint
 app.get(`${config.api.basePath}/health`, (req, res) => {
@@ -140,11 +165,6 @@ app.get(`${config.api.basePath}/health`, (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
-});
-
-// API documentation YAML
-app.get(`${config.api.basePath}/api-spec.yaml`, (req, res) => {
-  res.sendFile(path.join(__dirname, 'views/api-spec.yaml'));
 });
 
 // API documentation redirect
