@@ -16,12 +16,18 @@ servers:
 tags:
   - name: communicationMessage
     description: Operations about communication messages
+  - name: notification
+    description: Notification operations
+  - name: hub
+    description: Hub operations
+  - name: listener
+    description: Listener operations
 paths:
   /communicationMessage:
     get:
       tags: [communicationMessage]
       summary: List or find CommunicationMessage objects
-      description: This operation list or find CommunicationMessage entities
+      description: This operation lists or finds CommunicationMessage entities
       parameters:
         - $ref: '#/components/parameters/fieldsParam'
         - $ref: '#/components/parameters/offsetParam'
@@ -38,7 +44,7 @@ paths:
     post:
       tags: [communicationMessage]
       summary: Creates a CommunicationMessage
-      description: This operation creates a CommunicationMessage entity.
+      description: This operation creates a CommunicationMessage entity
       requestBody:
         required: true
         content:
@@ -52,6 +58,98 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunicationMessage'
+
+  /communicationMessage/{id}:
+    get:
+      tags: [communicationMessage]
+      summary: Retrieves a CommunicationMessage by ID
+      description: This operation retrieves a CommunicationMessage entity
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+        - $ref: '#/components/parameters/fieldsParam'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationMessage'
+    patch:
+      tags: [communicationMessage]
+      summary: Updates partially a CommunicationMessage
+      description: This operation updates partially a CommunicationMessage entity
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunicationMessage_Update'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationMessage'
+    delete:
+      tags: [communicationMessage]
+      summary: Deletes a CommunicationMessage
+      description: This operation deletes a CommunicationMessage entity
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '204':
+          description: No Content
+
+  /notification/state-change:
+    post:
+      tags: [notification]
+      summary: Publish a state change event
+      description: Publish a state change event for a communication message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateChangeEvent'
+      responses:
+        '201':
+          description: Event published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+
+  /hub:
+    post:
+      tags: [hub]
+      summary: Register a listener
+      description: Sets the communication endpoint address for notifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Hub'
+      responses:
+        '201':
+          description: Listener registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hub'
+    delete:
+      tags: [hub]
+      summary: Unregister a listener
+      description: Resets the communication endpoint address
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '204':
+          description: Listener unregistered
+
 components:
   parameters:
     fieldsParam:
@@ -79,6 +177,14 @@ components:
         type: integer
         format: int32
         default: 100
+    idParam:
+      name: id
+      in: path
+      description: Identifier of the CommunicationMessage
+      required: true
+      schema:
+        type: string
+
   schemas:
     CommunicationMessage:
       type: object
@@ -100,9 +206,71 @@ components:
           type: string
           enum: [initial, inProgress, completed, cancelled, failed]
           default: initial
+        description:
+          type: string
+          description: Description for the whole object
+        logFlag:
+          type: boolean
+          default: false
+          description: Flag indicating if message should be logged
+        priority:
+          type: string
+          description: The priority of the communication message
+        scheduledSendTime:
+          type: string
+          format: date-time
+          description: The scheduled time for sending the communication message
+        sendTime:
+          type: string
+          format: date-time
+          description: The time of sending communication message
+        sendTimeComplete:
+          type: string
+          format: date-time
+          description: The time of completion of sending communication message
+        subject:
+          type: string
+          description: The title of the message
+        tryTimes:
+          type: integer
+          default: 1
+          description: How many times to retry the delivery of this message
+        attachment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+        characteristic:
+          type: array
+          items:
+            $ref: '#/components/schemas/Characteristic'
+        receiver:
+          type: array
+          items:
+            $ref: '#/components/schemas/Receiver'
+          minItems: 1
+        sender:
+          $ref: '#/components/schemas/Sender'
+        x-baseType:
+          type: string
+          description: When sub-classing, this defines the super-class
+          x-field-name: "@baseType"
+        x-schemaLocation:
+          type: string
+          format: uri
+          description: A URI to a JSON-Schema file that defines additional attributes and relationships
+          x-field-name: "@schemaLocation"
+        x-type:
+          type: string
+          default: "CommunicationMessage"
+          x-field-name: "@type"
+
     CommunicationMessage_Create:
       type: object
-      required: [content, messageType]
+      required:
+        - content
+        - messageType
+        - receiver
+        - sender
       properties:
         content:
           type: string
@@ -110,3 +278,102 @@ components:
         messageType:
           type: string
           enum: [SMS, Email, MobileAppPush]
+        receiver:
+          type: array
+          items:
+            $ref: '#/components/schemas/Receiver'
+          minItems: 1
+        sender:
+          $ref: '#/components/schemas/Sender'
+        # Include all other create-required fields
+
+    CommunicationMessage_Update:
+      type: object
+      properties:
+        content:
+          type: string
+          description: The content of the communication message
+        state:
+          type: string
+          enum: [initial, inProgress, completed, cancelled, failed]
+        # Include all other updatable fields
+
+    StateChangeEvent:
+      type: object
+      required:
+        - communicationMessage
+        - state
+      properties:
+        communicationMessage:
+          $ref: '#/components/schemas/CommunicationMessage'
+        state:
+          type: string
+          enum: [initial, inProgress, completed, cancelled, failed]
+
+    Hub:
+      type: object
+      required:
+        - callback
+      properties:
+        callback:
+          type: string
+          format: uri
+          description: The callback URI for notifications
+        query:
+          type: string
+          description: The query to filter events
+
+    Event:
+      type: object
+      properties:
+        eventId:
+          type: string
+        eventType:
+          type: string
+        eventTime:
+          type: string
+          format: date-time
+        event:
+          type: object
+
+    # Include all your model schemas (Attachment, Characteristic, Receiver, Sender, etc.)
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        # Include all Attachment properties
+
+    Characteristic:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        value:
+          type: string
+        # Include all Characteristic properties
+
+    Receiver:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        # Include all Receiver properties
+
+    Sender:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        # Include all Sender properties
